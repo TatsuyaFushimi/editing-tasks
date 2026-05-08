@@ -134,7 +134,8 @@
 <div class="top-bar">
   <div class="dot"></div>
   <h1>編集D 添削タスク管理</h1>
-  <span id="change-count" style="font-size:.78rem;color:var(--sub)"></span>
+  <span id="status" style="font-size:.75rem;color:var(--sub)">読み込み中…</span>
+  <span id="change-count" style="font-size:.78rem;color:var(--orange)"></span>
   <div class="spacer"></div>
   <button class="btn btn-ghost" id="copy-btn" onclick="showCopy()">📋 変更をコピー</button>
 </div>
@@ -175,266 +176,80 @@
 </div>
 
 <script>
+var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxBj3IzsoqGLzBKD5JdRnJLVaGxZHba8vys5Pi3auTUNdOyQd1qFw40QIXGyXTsCaXd/exec';
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// データ（Claude が更新します / 直接編集しないでください）
-var BAKED_DATA = [
-  {
-    "id": "成田ch_65",
-    "pubDate": "5/11",
-    "title": "物販で売上1億いくまでに大事なこと（スモビジ）",
-    "shootDate": "4/22",
-    "handoverDate": "4/24",
-    "handoverDone": "",
-    "editor": "熊谷",
-    "draftDate": "4/29",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A66",
-    "sheetName": "成田ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "Yoshi ch_136",
-    "pubDate": "5/14",
-    "title": "YC ローマロエベ",
-    "shootDate": "イタリア",
-    "handoverDate": "4/2",
-    "handoverDone": "",
-    "editor": "谷添さん",
-    "draftDate": "5/6",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A137",
-    "sheetName": "Yoshi ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "成田ch_66",
-    "pubDate": "5/18",
-    "title": "実践者インタ木村さん",
-    "shootDate": "3/16",
-    "handoverDate": "済み",
-    "handoverDone": "",
-    "editor": "木下",
-    "draftDate": "4/29",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A67",
-    "sheetName": "成田ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "Yoshi ch_137",
-    "pubDate": "5/22",
-    "title": "ブランド品転売ビジネスなら無在庫も簡単。",
-    "shootDate": "4/17",
-    "handoverDate": "4/23",
-    "handoverDone": "",
-    "editor": "谷添さん",
-    "draftDate": "5/14",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A138",
-    "sheetName": "Yoshi ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "成田ch_67",
-    "pubDate": "5/24",
-    "title": "騙されるな転売ビジネスもう稼げない",
-    "shootDate": "4/22",
-    "handoverDate": "4/24",
-    "handoverDone": "",
-    "editor": "上原",
-    "draftDate": "5/6",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A68",
-    "sheetName": "成田ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "成田ch_68",
-    "pubDate": "6/1",
-    "title": "1000万稼ぎたいならクラファンが一番",
-    "shootDate": "4/22",
-    "handoverDate": "4/24",
-    "handoverDone": "",
-    "editor": "熊谷
-（予定）",
-    "draftDate": "5/25",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A69",
-    "sheetName": "成田ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "成田ch_69",
-    "pubDate": "6/7",
-    "title": "2026年最新スモビジ",
-    "shootDate": "4/22",
-    "handoverDate": "4/24",
-    "handoverDone": "",
-    "editor": "熊谷
-（予定）",
-    "draftDate": "6/1",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A70",
-    "sheetName": "成田ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "船原ch_113",
-    "pubDate": "7/5",
-    "title": "差別化ローンチLINE",
-    "shootDate": "5/25",
-    "handoverDate": "",
-    "handoverDone": "",
-    "editor": "",
-    "draftDate": "",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1260224820&range=A114",
-    "sheetName": "船原ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "船原ch_115",
-    "pubDate": "7/17",
-    "title": "BUYMAローンチLINE",
-    "shootDate": "6/5",
-    "handoverDate": "",
-    "handoverDone": "",
-    "editor": "",
-    "draftDate": "",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1260224820&range=A116",
-    "sheetName": "船原ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "船原ch_117",
-    "pubDate": "7/29",
-    "title": "（座学）仕事を辞めたい40代50代見ないと損しますLINE",
-    "shootDate": "4/10",
-    "handoverDate": "4/13",
-    "handoverDone": "",
-    "editor": "加藤",
-    "draftDate": "4/26",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1260224820&range=A118",
-    "sheetName": "船原ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "Yoshi ch_146",
-    "pubDate": "ストック",
-    "title": "re極貧生活",
-    "shootDate": "",
-    "handoverDate": "",
-    "handoverDone": "",
-    "editor": "北川さん",
-    "draftDate": "済？",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A147",
-    "sheetName": "Yoshi ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "Yoshi ch_147",
-    "pubDate": "ストック",
-    "title": "YCローマFENDI",
-    "shootDate": "イタリア",
-    "handoverDate": "3/31",
-    "handoverDone": "",
-    "editor": "",
-    "draftDate": "",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A148",
-    "sheetName": "Yoshi ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "Yoshi ch_151",
-    "pubDate": "ストック",
-    "title": "免税手続き・改",
-    "shootDate": "3/10",
-    "handoverDate": "4/23",
-    "handoverDone": "",
-    "editor": "谷添
-（予定）",
-    "draftDate": "",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A152",
-    "sheetName": "Yoshi ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  }
-];
+// 編集フィールド保存データ（Claude が更新）
+// {id: {editorStatus, proofDeadline, revisionDeadline, notes}}
+var BAKED_DATA = {};
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+var _rows = [];
 var _changes = {};
 
+// Sheets から取得してマージして描画
+async function init() {
+  document.getElementById('status').textContent = '取得中…';
+  try {
+    var res = await fetch(WEB_APP_URL);
+    var fresh = await res.json();
+    _rows = fresh.map(function(r) {
+      var saved = BAKED_DATA[r.id] || {};
+      return Object.assign({}, r, {
+        editorStatus:    saved.editorStatus    || '',
+        proofDeadline:   saved.proofDeadline   || '',
+        revisionDeadline:saved.revisionDeadline|| '',
+        notes:           saved.notes           || ''
+      });
+    });
+    document.getElementById('status').textContent =
+      '最終取得: ' + new Date().toLocaleTimeString('ja-JP');
+  } catch(e) {
+    document.getElementById('status').textContent = '取得失敗: ' + e.message;
+  }
+  render();
+}
+
+// 変更追跡
 function markChange(id, field, value) {
   if (!_changes[id]) _changes[id] = {};
   _changes[id][field] = value;
-  var count = Object.keys(_changes).length;
-  document.getElementById('change-count').textContent = count > 0 ? count + '件の変更あり' : '';
+  var n = Object.keys(_changes).length;
+  document.getElementById('change-count').textContent = n ? n + '件の変更あり' : '';
 }
 
+// テキスト入力セル
 function editText(row, field, placeholder) {
   var inp = document.createElement('input');
   inp.type = 'text';
   inp.className = 'edit-text';
   inp.placeholder = placeholder || '';
   inp.value = row[field] || '';
+  if (_changes[row.id] && _changes[row.id][field] !== undefined) inp.classList.add('changed');
   inp.addEventListener('change', function() {
     row[field] = inp.value;
     markChange(row.id, field, inp.value);
     inp.classList.add('changed');
     render();
   });
-  if (row[field]) inp.classList.add((_changes[row.id] && _changes[row.id][field] !== undefined) ? 'changed' : '');
   return inp;
 }
 
+// 日付入力セル
 function editDate(row, field) {
   var inp = document.createElement('input');
   inp.type = 'date';
   inp.className = 'edit-date';
-  // BAKED_DATA の値は "M/D" 形式なので date input 用に変換
   if (row[field]) {
-    var parts = row[field].split('/');
-    if (parts.length === 2) {
-      var y = new Date().getFullYear();
-      inp.value = y + '-' + parts[0].padStart(2,'0') + '-' + parts[1].padStart(2,'0');
-    } else {
-      inp.value = row[field];
-    }
+    var p = row[field].split('/');
+    if (p.length === 2)
+      inp.value = new Date().getFullYear() + '-' + p[0].padStart(2,'0') + '-' + p[1].padStart(2,'0');
+    else inp.value = row[field];
   }
   if (_changes[row.id] && _changes[row.id][field] !== undefined) inp.classList.add('changed');
   inp.addEventListener('change', function() {
-    if (!inp.value) { row[field] = ''; markChange(row.id, field, ''); return; }
-    var d = new Date(inp.value);
+    if (!inp.value) { row[field] = ''; markChange(row.id, field, ''); render(); return; }
+    var d = new Date(inp.value + 'T00:00:00');
     var label = (d.getMonth()+1) + '/' + d.getDate();
     row[field] = label;
     markChange(row.id, field, label);
@@ -444,6 +259,7 @@ function editDate(row, field) {
   return inp;
 }
 
+// 行生成
 function makeRow(r, isUrgent) {
   var tr = document.createElement('tr');
   function td(text, cls) {
@@ -468,65 +284,53 @@ function makeRow(r, isUrgent) {
   tr.appendChild(tdi(editDate(r, 'proofDeadline')));
   tr.appendChild(tdi(editDate(r, 'revisionDeadline')));
   tr.appendChild(tdi(editText(r, 'notes', '')));
-
-  var linkTd = document.createElement('td');
   var a = document.createElement('a');
-  a.href = r.sheetUrl; a.target = '_blank'; a.className = 'link-btn'; a.textContent = '📄 シート';
-  linkTd.appendChild(a);
-  tr.appendChild(linkTd);
+  a.href = r.sheetUrl; a.target = '_blank'; a.className = 'link-btn'; a.textContent = '📄';
+  var lt = document.createElement('td'); lt.appendChild(a);
+  tr.appendChild(lt);
   return tr;
 }
 
+// 描画
 function render() {
-  var urgentBody = document.getElementById('urgent-body');
-  var mainBody   = document.getElementById('main-body');
-  urgentBody.innerHTML = '';
-  mainBody.innerHTML   = '';
-
-  var urgentCount = 0;
-  BAKED_DATA.forEach(function(r) {
-    mainBody.appendChild(makeRow(r, false));
+  var ub = document.getElementById('urgent-body');
+  var mb = document.getElementById('main-body');
+  ub.innerHTML = ''; mb.innerHTML = '';
+  var uc = 0;
+  _rows.forEach(function(r) {
+    mb.appendChild(makeRow(r, false));
     if (r.handoverDone === '済み' && r.editorStatus !== '完了') {
-      urgentBody.appendChild(makeRow(r, true));
-      urgentCount++;
+      ub.appendChild(makeRow(r, true)); uc++;
     }
   });
-
-  if (urgentCount === 0)
-    urgentBody.innerHTML = '<tr><td colspan="10" class="empty">対応が必要な案件はありません ✅</td></tr>';
-  if (BAKED_DATA.length === 0)
-    mainBody.innerHTML   = '<tr><td colspan="13" class="empty">データがありません。Claude に「データ更新して」と伝えてください。</td></tr>';
+  if (!uc) ub.innerHTML = '<tr><td colspan="10" class="empty">対応が必要な案件はありません ✅</td></tr>';
+  if (!_rows.length) mb.innerHTML = '<tr><td colspan="13" class="empty">データ取得中…</td></tr>';
 }
 
+// 変更コピー
 function showCopy() {
   var ids = Object.keys(_changes);
-  if (ids.length === 0) { alert('まだ変更はありません。'); return; }
-
-  var LABELS = { editorStatus:'編集者状況', proofDeadline:'添削期日', revisionDeadline:'修正期日', notes:'備考' };
+  if (!ids.length) { alert('まだ変更はありません。'); return; }
+  var L = { editorStatus:'編集者状況', proofDeadline:'添削期日', revisionDeadline:'修正期日', notes:'備考' };
   var lines = ['以下の変更を BAKED_DATA に反映してコミットしてください。', ''];
   ids.forEach(function(id) {
-    var row = BAKED_DATA.find(function(r){ return r.id === id; });
-    lines.push('id: ' + id + '  (' + (row ? row.sheetName + ' / ' + row.title : '') + ')');
+    var r = _rows.find(function(x){ return x.id === id; });
+    lines.push('id: ' + id + '  (' + (r ? r.sheetName + ' / ' + r.title : '') + ')');
     Object.keys(_changes[id]).forEach(function(f) {
-      lines.push('  ' + (LABELS[f]||f) + ': ' + (_changes[id][f] || '（空欄）'));
+      lines.push('  ' + (L[f]||f) + ': ' + (_changes[id][f] || '（空欄）'));
     });
     lines.push('');
   });
-
   document.getElementById('copy-text').value = lines.join('\n');
   document.getElementById('copy-banner').style.display = 'block';
   document.getElementById('copy-banner').scrollIntoView({behavior:'smooth'});
 }
-
 function doCopy() {
-  var t = document.getElementById('copy-text');
-  navigator.clipboard.writeText(t.value).then(function() {
-    var btn = event.target;
-    btn.textContent = '✅ コピーしました';
-    setTimeout(function(){ btn.textContent = '📋 クリップボードにコピー'; }, 2000);
+  navigator.clipboard.writeText(document.getElementById('copy-text').value).then(function() {
+    var b = event.target; b.textContent = '✅ コピーしました';
+    setTimeout(function(){ b.textContent = '📋 クリップボードにコピー'; }, 2000);
   });
 }
-
 function resetChanges() {
   _changes = {};
   document.getElementById('change-count').textContent = '';
@@ -534,7 +338,7 @@ function resetChanges() {
   render();
 }
 
-render();
+init();
 </script>
 </body>
 </html>
