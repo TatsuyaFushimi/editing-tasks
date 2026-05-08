@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>編集D 添削タスク管理</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      padding: 24px 16px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .updated {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 24px;
+    }
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 24px 0 10px;
+    }
+    .section-label {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .label-urgent { background: #fff0f0; color: #d00; border: 1px solid #fcc; }
+    .label-all    { background: #f0f4ff; color: #226; border: 1px solid #cdf; }
+    .label-done   { background: #f0fff4; color: #060; border: 1px solid #cec; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      font-size: 0.875rem;
+      margin-bottom: 8px;
+    }
+    th {
+      background: #f0f0f5;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: #555;
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 12px;
+      border-top: 1px solid #f0f0f0;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    tr:hover td { background: #fafafa; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .s-blue   { background: #e8f0fe; color: #1a56db; }
+    .s-yellow { background: #fff8e1; color: #b45309; }
+    .s-orange { background: #fff3e0; color: #c2410c; }
+    .s-red    { background: #fde8e8; color: #b91c1c; }
+    .s-green  { background: #e8f5e9; color: #166534; }
+    .s-gray   { background: #f3f4f6; color: #6b7280; }
+    .s-warn   { background: #fef3c7; color: #92400e; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: #555;
+    }
+    @media (max-width: 640px) {
+      table { font-size: 0.78rem; }
+      td, th { padding: 8px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>編集D 添削タスク管理</h1>
+  <div class="updated">最終更新: 2026/05/08</div>
+
+  <!-- ⚡ 今すぐ対応が必要 -->
+  <span class="section-label label-urgent">⚡ 今すぐ対応が必要</span>
+  <table id="urgent-table">
+    <thead>
+      <tr>
+        <th>動画名</th>
+        <th>対応内容</th>
+        <th>期日</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>サンプル動画A</td>
+        <td>添削する</td>
+        <td>2026/05/09</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 📋 全体進捗 -->
+  <span class="section-label label-all">📋 全体進捗</span>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>動画名</th>
+        <th>公開日</th>
+        <th>依頼日</th>
+        <th>初稿期日</th>
+        <th>添削期日</th>
+        <th>修正期日</th>
+        <th>確認期日</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>サンプル動画A</td>
+        <td>05/20</td>
+        <td>05/01</td>
+        <td>05/07</td>
+        <td>05/09</td>
+        <td>05/12</td>
+        <td>05/14</td>
+        <td><span class="badge s-yellow">🟡 添削待ち</span></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>サンプル動画B</td>
+        <td>05/25</td>
+        <td>05/05</td>
+        <td>05/12</td>
+        <td>05/14</td>
+        <td>05/17</td>
+        <td>05/19</td>
+        <td><span class="badge s-blue">🔵 初稿待ち</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ✅ 完了（今月） -->
+  <span class="section-label label-done">✅ 完了（今月）</span>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>動画名</th>
+        <th>公開日</th>
+        <th>完了日</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="4" style="color:#aaa; text-align:center; padding:16px;">まだありません</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 凡例 -->
+  <div class="legend">
+    <div class="legend-item"><span class="badge s-blue">🔵 初稿待ち</span> 編集Dが作成中</div>
+    <div class="legend-item"><span class="badge s-yellow">🟡 添削待ち</span> 自分が添削する</div>
+    <div class="legend-item"><span class="badge s-orange">🟠 修正待ち</span> 編集Dが修正中</div>
+    <div class="legend-item"><span class="badge s-red">🔴 確認待ち</span> 自分が確認する</div>
+    <div class="legend-item"><span class="badge s-green">✅ 完了</span></div>
+    <div class="legend-item"><span class="badge s-warn">⚠️ 期日超過</span></div>
+  </div>
+
+</body>
+</html>
