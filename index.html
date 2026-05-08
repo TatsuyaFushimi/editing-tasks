@@ -164,6 +164,17 @@
     }
     .link-btn:hover { border-color: var(--orange); color: var(--orange); }
 
+    .channel {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      color: #aaa;
+      letter-spacing: 0.03em;
+    }
+
     /* ---- ローディング / エラー ---- */
     #loading {
       text-align: center;
@@ -201,6 +212,7 @@
   <table id="urgent-table">
     <thead>
       <tr>
+        <th>チャンネル</th>
         <th>公開予定日</th>
         <th>タイトル</th>
         <th>編集者</th>
@@ -213,7 +225,7 @@
       </tr>
     </thead>
     <tbody id="urgent-body">
-      <tr><td colspan="9" style="color:#444;text-align:center;padding:20px">データ未取得</td></tr>
+      <tr><td colspan="10" style="color:#444;text-align:center;padding:20px">データ未取得</td></tr>
     </tbody>
   </table>
 </div>
@@ -224,6 +236,7 @@
   <table id="main-table">
     <thead>
       <tr>
+        <th>チャンネル</th>
         <th>公開予定日</th>
         <th>タイトル</th>
         <th>撮影予定日</th>
@@ -239,7 +252,7 @@
       </tr>
     </thead>
     <tbody id="main-body">
-      <tr><td colspan="12" style="color:#444;text-align:center;padding:20px">データ未取得</td></tr>
+      <tr><td colspan="13" style="color:#444;text-align:center;padding:20px">データ未取得</td></tr>
     </tbody>
   </table>
 </div>
@@ -265,14 +278,20 @@
     return (d[id] && d[id][field]) ? d[id][field] : '';
   }
 
+  var _saveTimers = {};
   function editableCell(id, field, placeholder) {
     var td = document.createElement('td');
     td.contentEditable = 'true';
     td.setAttribute('data-placeholder', placeholder || '');
     td.textContent = getField(id, field);
-    td.addEventListener('blur', function() {
+    function persist() {
       saveField(id, field, td.textContent.trim());
       renderUrgent(window._lastRows);
+    }
+    td.addEventListener('blur', persist);
+    td.addEventListener('input', function() {
+      clearTimeout(_saveTimers[id + field]);
+      _saveTimers[id + field] = setTimeout(persist, 600);
     });
     return td;
   }
@@ -293,6 +312,7 @@
     }
 
     if (!isUrgent) {
+      tr.appendChild(td(r.sheetName, 'channel'));
       tr.appendChild(td(r.pubDate));
       tr.appendChild(td(r.title));
       tr.appendChild(td(r.shootDate));
@@ -301,6 +321,7 @@
       tr.appendChild(td(r.editor));
       tr.appendChild(td(r.draftDate));
     } else {
+      tr.appendChild(td(r.sheetName));
       tr.appendChild(td(r.pubDate));
       tr.appendChild(td(r.title));
       tr.appendChild(td(r.editor));
@@ -337,7 +358,7 @@
       }
     });
     if (shown === 0) {
-      body.innerHTML = '<tr><td colspan="9" style="color:#444;text-align:center;padding:20px">対応が必要な案件はありません ✅</td></tr>';
+      body.innerHTML = '<tr><td colspan="10" style="color:#444;text-align:center;padding:20px">対応が必要な案件はありません ✅</td></tr>';
     }
   }
 
@@ -345,7 +366,7 @@
     var body = document.getElementById('main-body');
     body.innerHTML = '';
     if (rows.length === 0) {
-      body.innerHTML = '<tr><td colspan="12" style="color:#444;text-align:center;padding:20px">条件に合う案件がありません</td></tr>';
+      body.innerHTML = '<tr><td colspan="13" style="color:#444;text-align:center;padding:20px">条件に合う案件がありません</td></tr>';
       return;
     }
     rows.forEach(function(r) {
