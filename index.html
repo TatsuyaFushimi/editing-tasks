@@ -6,19 +6,16 @@
   <title>編集D 添削タスク管理</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg:        #111214;
-      --surface:   #1a1c20;
-      --surface2:  #222428;
-      --border:    #2e3035;
-      --orange:    #ff6a1a;
-      --orange-dim:#7a3210;
-      --text:      #e0e0e0;
-      --text-sub:  #777;
-      --text-muted:#444;
+      --bg:       #111214;
+      --surface:  #1a1c20;
+      --surface2: #222428;
+      --border:   #2e3035;
+      --orange:   #ff6a1a;
+      --text:     #e0e0e0;
+      --sub:      #777;
+      --muted:    #3a3a3a;
     }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
@@ -26,381 +23,518 @@
       padding: 24px 16px 60px;
       font-size: 13px;
     }
-
-    /* ---- トップバー ---- */
     .top-bar {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 24px;
-      flex-wrap: wrap;
       border-bottom: 1px solid var(--border);
       padding-bottom: 16px;
+      flex-wrap: wrap;
     }
-    .logo-dot {
-      width: 10px; height: 10px;
-      background: var(--orange);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--orange);
-      flex-shrink: 0;
+    .dot { width:10px;height:10px;background:var(--orange);border-radius:50%;box-shadow:0 0 8px var(--orange);flex-shrink:0; }
+    h1 { font-size:1.15rem;font-weight:700;color:#fff;letter-spacing:.02em; }
+    .spacer { flex:1; }
+    .btn {
+      border: none; border-radius: 8px; padding: 6px 14px;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      letter-spacing: .03em; transition: opacity .15s;
     }
-    h1 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      color: #fff;
-    }
-    #last-updated { font-size: 0.75rem; color: var(--text-sub); }
-    .refresh-btn {
-      margin-left: auto;
-      background: var(--orange);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 6px 16px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 0.03em;
-      transition: opacity .15s;
-    }
-    .refresh-btn:hover { opacity: 0.85; }
+    .btn:hover { opacity: .8; }
+    .btn-orange { background: var(--orange); color: #fff; }
+    .btn-ghost  { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
 
-    /* ---- セクションラベル ---- */
+    /* コピーバナー */
+    #copy-banner {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--orange);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    #copy-banner p { font-size:.78rem; color: var(--sub); margin-bottom: 8px; }
+    #copy-text {
+      width:100%; background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 10px; font-size:.8rem; font-family: monospace;
+      resize: vertical; min-height: 80px;
+    }
+
+    /* セクションラベル */
     .section-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 4px 14px;
-      border-radius: 4px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 4px 14px; border-radius: 4px;
+      font-size:.72rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
       margin: 22px 0 10px;
     }
-    .label-urgent {
-      background: rgba(255,106,26,.15);
-      color: var(--orange);
-      border-left: 3px solid var(--orange);
-    }
-    .label-all {
-      background: rgba(255,255,255,.04);
-      color: #aaa;
-      border-left: 3px solid #444;
-    }
+    .label-urgent { background:rgba(255,106,26,.15); color:var(--orange); border-left:3px solid var(--orange); }
+    .label-all    { background:rgba(255,255,255,.04); color:#aaa; border-left:3px solid #444; }
 
-    /* ---- テーブル ---- */
-    .wrap { width: 100%; overflow-x: auto; }
+    /* テーブル */
+    .wrap { width:100%; overflow-x:auto; }
     table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--surface);
-      border-radius: 10px;
-      overflow: hidden;
-      min-width: 900px;
-      border: 1px solid var(--border);
+      width:100%; border-collapse:collapse; background:var(--surface);
+      border-radius:10px; overflow:hidden; min-width:960px;
+      border:1px solid var(--border);
     }
     th {
-      background: var(--surface2);
-      padding: 9px 12px;
-      text-align: left;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--text-sub);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      white-space: nowrap;
-      border-bottom: 1px solid var(--border);
+      background:var(--surface2); padding:9px 12px; text-align:left;
+      font-size:.7rem; font-weight:700; color:var(--sub);
+      letter-spacing:.06em; text-transform:uppercase;
+      white-space:nowrap; border-bottom:1px solid var(--border);
     }
     td {
-      padding: 9px 12px;
-      border-top: 1px solid var(--border);
-      vertical-align: middle;
-      white-space: nowrap;
-      color: var(--text);
+      padding:8px 12px; border-top:1px solid var(--border);
+      vertical-align:middle; white-space:nowrap; color:var(--text);
     }
-    tr:hover td { background: rgba(255,255,255,.03); }
+    tr:hover td { background:rgba(255,255,255,.03); }
 
-    /* ---- 編集可能セル ---- */
-    td[contenteditable="true"] {
+    /* 編集セル */
+    .edit-text, .edit-date {
       background: rgba(255,106,26,.07);
-      cursor: text;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 0.8rem;
+      padding: 3px 7px;
+      width: 100%;
       min-width: 80px;
-      border-radius: 4px;
+      transition: background .15s, border-color .15s;
+    }
+    .edit-text:focus, .edit-date:focus {
       outline: none;
-      transition: background .15s;
-    }
-    td[contenteditable="true"]:focus {
       background: rgba(255,106,26,.15);
-      box-shadow: 0 0 0 2px var(--orange) inset;
+      border-color: var(--orange);
     }
-    td[contenteditable="true"]:empty::before {
-      content: attr(data-placeholder);
-      color: var(--text-muted);
-      pointer-events: none;
-    }
+    .edit-text::placeholder, .edit-date:invalid { color: var(--muted); }
+    .edit-date { min-width: 110px; cursor: pointer; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.4); cursor: pointer; }
 
-    /* ---- バッジ ---- */
-    .done {
-      background: rgba(255,106,26,.2);
-      color: var(--orange);
-      padding: 2px 9px;
-      border-radius: 20px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-    }
+    /* バッジ */
+    .done    { background:rgba(255,106,26,.2);color:var(--orange);padding:2px 9px;border-radius:20px;font-size:.72rem;font-weight:700; }
+    .channel { background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-size:.7rem;color:#aaa; }
     .link-btn {
-      display: inline-block;
-      padding: 3px 11px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      text-decoration: none;
-      color: #aaa;
-      font-size: 0.72rem;
-      transition: border-color .15s, color .15s;
+      display:inline-block; padding:3px 11px;
+      background:var(--surface2); border:1px solid var(--border);
+      border-radius:6px; text-decoration:none; color:#aaa;
+      font-size:.72rem; transition:border-color .15s,color .15s;
     }
-    .link-btn:hover { border-color: var(--orange); color: var(--orange); }
+    .link-btn:hover { border-color:var(--orange); color:var(--orange); }
 
-    .channel {
-      display: inline-block;
-      padding: 2px 8px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-size: 0.7rem;
-      color: #aaa;
-      letter-spacing: 0.03em;
-    }
+    /* 空状態 */
+    .empty { color:#444; text-align:center; padding:20px; }
 
-    /* ---- ローディング / エラー ---- */
-    #loading {
-      text-align: center;
-      padding: 30px;
-      color: var(--text-sub);
-      display: none;
-    }
-    #error-msg {
-      background: rgba(255,60,60,.1);
-      border: 1px solid rgba(255,60,60,.3);
-      border-radius: 8px;
-      padding: 12px 16px;
-      color: #ff6b6b;
-      margin-top: 10px;
-      display: none;
-    }
+    /* 変更ハイライト */
+    .changed { border-color: var(--orange) !important; }
   </style>
 </head>
 <body>
 
 <div class="top-bar">
-  <div class="logo-dot"></div>
+  <div class="dot"></div>
   <h1>編集D 添削タスク管理</h1>
-  <span id="last-updated">未取得</span>
-  <button class="refresh-btn" onclick="fetchData()">🔄 更新</button>
+  <span id="change-count" style="font-size:.78rem;color:var(--sub)"></span>
+  <div class="spacer"></div>
+  <button class="btn btn-ghost" id="copy-btn" onclick="showCopy()">📋 変更をコピー</button>
 </div>
 
+<div id="copy-banner">
+  <p>以下をコピーして Claude に送ってください。送信後「変更をリセット」を押すと変更マークが消えます。</p>
+  <textarea id="copy-text" readonly></textarea>
+  <div style="display:flex;gap:8px;margin-top:8px;">
+    <button class="btn btn-orange" onclick="doCopy()">📋 クリップボードにコピー</button>
+    <button class="btn btn-ghost" onclick="resetChanges()">変更をリセット</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('copy-banner').style.display='none'">閉じる</button>
+  </div>
+</div>
 
-<div id="loading">📡 スプレッドシートからデータ取得中…</div>
-<div id="error-msg"></div>
-
-<!-- ⚡ 今すぐ対応が必要 -->
 <div class="section-label label-urgent">⚡ 今すぐ対応が必要（引継ぎ済み・未完了）</div>
 <div class="wrap">
-  <table id="urgent-table">
-    <thead>
-      <tr>
-        <th>チャンネル</th>
-        <th>公開予定日</th>
-        <th>タイトル</th>
-        <th>編集者</th>
-        <th>初稿予定</th>
-        <th>編集者状況</th>
-        <th>添削期日</th>
-        <th>修正期日</th>
-        <th>備考</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="urgent-body">
-      <tr><td colspan="10" style="color:#444;text-align:center;padding:20px">データ未取得</td></tr>
-    </tbody>
+  <table>
+    <thead><tr>
+      <th>チャンネル</th><th>公開予定日</th><th>タイトル</th>
+      <th>編集者</th><th>初稿予定</th>
+      <th>編集者状況</th><th>添削期日</th><th>修正期日</th><th>備考</th><th></th>
+    </tr></thead>
+    <tbody id="urgent-body"></tbody>
   </table>
 </div>
 
-<!-- 📋 全体一覧 -->
 <div class="section-label label-all">📋 全体一覧（伏見 担当 / 今日以降）</div>
 <div class="wrap">
-  <table id="main-table">
-    <thead>
-      <tr>
-        <th>チャンネル</th>
-        <th>公開予定日</th>
-        <th>タイトル</th>
-        <th>撮影予定日</th>
-        <th>引継日</th>
-        <th>引継ぎ</th>
-        <th>編集者</th>
-        <th>初稿予定</th>
-        <th>編集者状況</th>
-        <th>添削期日</th>
-        <th>修正期日</th>
-        <th>備考</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="main-body">
-      <tr><td colspan="13" style="color:#444;text-align:center;padding:20px">データ未取得</td></tr>
-    </tbody>
+  <table>
+    <thead><tr>
+      <th>チャンネル</th><th>公開予定日</th><th>タイトル</th>
+      <th>撮影予定日</th><th>引継日</th><th>引継ぎ</th>
+      <th>編集者</th><th>初稿予定</th>
+      <th>編集者状況</th><th>添削期日</th><th>修正期日</th><th>備考</th><th></th>
+    </tr></thead>
+    <tbody id="main-body"></tbody>
   </table>
 </div>
 
 <script>
-  // ▼▼▼ デプロイ後にここを書き換えてください ▼▼▼
-  var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxBj3IzsoqGLzBKD5JdRnJLVaGxZHba8vys5Pi3auTUNdOyQd1qFw40QIXGyXTsCaXd/exec';
-  // ▲▲▲
-
-  var STORAGE_KEY = 'editing_tasks_local';
-
-  function getLocal() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// データ（Claude が更新します / 直接編集しないでください）
+var BAKED_DATA = [
+  {
+    "id": "成田ch_65",
+    "pubDate": "5/11",
+    "title": "物販で売上1億いくまでに大事なこと（スモビジ）",
+    "shootDate": "4/22",
+    "handoverDate": "4/24",
+    "handoverDone": "",
+    "editor": "熊谷",
+    "draftDate": "4/29",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A66",
+    "sheetName": "成田ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "Yoshi ch_136",
+    "pubDate": "5/14",
+    "title": "YC ローマロエベ",
+    "shootDate": "イタリア",
+    "handoverDate": "4/2",
+    "handoverDone": "",
+    "editor": "谷添さん",
+    "draftDate": "5/6",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A137",
+    "sheetName": "Yoshi ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "成田ch_66",
+    "pubDate": "5/18",
+    "title": "実践者インタ木村さん",
+    "shootDate": "3/16",
+    "handoverDate": "済み",
+    "handoverDone": "",
+    "editor": "木下",
+    "draftDate": "4/29",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A67",
+    "sheetName": "成田ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "Yoshi ch_137",
+    "pubDate": "5/22",
+    "title": "ブランド品転売ビジネスなら無在庫も簡単。",
+    "shootDate": "4/17",
+    "handoverDate": "4/23",
+    "handoverDone": "",
+    "editor": "谷添さん",
+    "draftDate": "5/14",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A138",
+    "sheetName": "Yoshi ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "成田ch_67",
+    "pubDate": "5/24",
+    "title": "騙されるな転売ビジネスもう稼げない",
+    "shootDate": "4/22",
+    "handoverDate": "4/24",
+    "handoverDone": "",
+    "editor": "上原",
+    "draftDate": "5/6",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A68",
+    "sheetName": "成田ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "成田ch_68",
+    "pubDate": "6/1",
+    "title": "1000万稼ぎたいならクラファンが一番",
+    "shootDate": "4/22",
+    "handoverDate": "4/24",
+    "handoverDone": "",
+    "editor": "熊谷
+（予定）",
+    "draftDate": "5/25",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A69",
+    "sheetName": "成田ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "成田ch_69",
+    "pubDate": "6/7",
+    "title": "2026年最新スモビジ",
+    "shootDate": "4/22",
+    "handoverDate": "4/24",
+    "handoverDone": "",
+    "editor": "熊谷
+（予定）",
+    "draftDate": "6/1",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A70",
+    "sheetName": "成田ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "船原ch_113",
+    "pubDate": "7/5",
+    "title": "差別化ローンチLINE",
+    "shootDate": "5/25",
+    "handoverDate": "",
+    "handoverDone": "",
+    "editor": "",
+    "draftDate": "",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1260224820&range=A114",
+    "sheetName": "船原ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "船原ch_115",
+    "pubDate": "7/17",
+    "title": "BUYMAローンチLINE",
+    "shootDate": "6/5",
+    "handoverDate": "",
+    "handoverDone": "",
+    "editor": "",
+    "draftDate": "",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1260224820&range=A116",
+    "sheetName": "船原ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "船原ch_117",
+    "pubDate": "7/29",
+    "title": "（座学）仕事を辞めたい40代50代見ないと損しますLINE",
+    "shootDate": "4/10",
+    "handoverDate": "4/13",
+    "handoverDone": "",
+    "editor": "加藤",
+    "draftDate": "4/26",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1260224820&range=A118",
+    "sheetName": "船原ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "Yoshi ch_146",
+    "pubDate": "ストック",
+    "title": "re極貧生活",
+    "shootDate": "",
+    "handoverDate": "",
+    "handoverDone": "",
+    "editor": "北川さん",
+    "draftDate": "済？",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A147",
+    "sheetName": "Yoshi ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "Yoshi ch_147",
+    "pubDate": "ストック",
+    "title": "YCローマFENDI",
+    "shootDate": "イタリア",
+    "handoverDate": "3/31",
+    "handoverDone": "",
+    "editor": "",
+    "draftDate": "",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A148",
+    "sheetName": "Yoshi ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
+  },
+  {
+    "id": "Yoshi ch_151",
+    "pubDate": "ストック",
+    "title": "免税手続き・改",
+    "shootDate": "3/10",
+    "handoverDate": "4/23",
+    "handoverDone": "",
+    "editor": "谷添
+（予定）",
+    "draftDate": "",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A152",
+    "sheetName": "Yoshi ch",
+    "editorStatus": "",
+    "proofDeadline": "",
+    "revisionDeadline": "",
+    "notes": ""
   }
-  function saveField(id, field, value) {
-    var d = getLocal();
-    if (!d[id]) d[id] = {};
-    d[id][field] = value;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
-  }
-  function getField(id, field) {
-    var d = getLocal();
-    return (d[id] && d[id][field]) ? d[id][field] : '';
-  }
+];
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  var _saveTimers = {};
-  function editableCell(id, field, placeholder) {
-    var td = document.createElement('td');
-    td.contentEditable = 'true';
-    td.setAttribute('data-placeholder', placeholder || '');
-    td.textContent = getField(id, field);
-    function persist() {
-      saveField(id, field, td.textContent.trim());
-      renderUrgent(window._lastRows);
-    }
-    td.addEventListener('blur', persist);
-    td.addEventListener('input', function() {
-      clearTimeout(_saveTimers[id + field]);
-      _saveTimers[id + field] = setTimeout(persist, 600);
-    });
-    return td;
-  }
+var _changes = {};
 
-  function makeRow(r, isUrgent) {
-    var tr = document.createElement('tr');
-    function td(text, cls) {
-      var el = document.createElement('td');
-      if (cls) {
-        var span = document.createElement('span');
-        span.className = cls;
-        span.textContent = text;
-        el.appendChild(span);
-      } else {
-        el.textContent = text;
-      }
-      return el;
-    }
+function markChange(id, field, value) {
+  if (!_changes[id]) _changes[id] = {};
+  _changes[id][field] = value;
+  var count = Object.keys(_changes).length;
+  document.getElementById('change-count').textContent = count > 0 ? count + '件の変更あり' : '';
+}
 
-    if (!isUrgent) {
-      tr.appendChild(td(r.sheetName, 'channel'));
-      tr.appendChild(td(r.pubDate));
-      tr.appendChild(td(r.title));
-      tr.appendChild(td(r.shootDate));
-      tr.appendChild(td(r.handoverDate));
-      tr.appendChild(td(r.handoverDone, r.handoverDone ? 'done' : ''));
-      tr.appendChild(td(r.editor));
-      tr.appendChild(td(r.draftDate));
+function editText(row, field, placeholder) {
+  var inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'edit-text';
+  inp.placeholder = placeholder || '';
+  inp.value = row[field] || '';
+  inp.addEventListener('change', function() {
+    row[field] = inp.value;
+    markChange(row.id, field, inp.value);
+    inp.classList.add('changed');
+    render();
+  });
+  if (row[field]) inp.classList.add((_changes[row.id] && _changes[row.id][field] !== undefined) ? 'changed' : '');
+  return inp;
+}
+
+function editDate(row, field) {
+  var inp = document.createElement('input');
+  inp.type = 'date';
+  inp.className = 'edit-date';
+  // BAKED_DATA の値は "M/D" 形式なので date input 用に変換
+  if (row[field]) {
+    var parts = row[field].split('/');
+    if (parts.length === 2) {
+      var y = new Date().getFullYear();
+      inp.value = y + '-' + parts[0].padStart(2,'0') + '-' + parts[1].padStart(2,'0');
     } else {
-      tr.appendChild(td(r.sheetName));
-      tr.appendChild(td(r.pubDate));
-      tr.appendChild(td(r.title));
-      tr.appendChild(td(r.editor));
-      tr.appendChild(td(r.draftDate));
+      inp.value = row[field];
     }
-
-    tr.appendChild(editableCell(r.id, 'editorStatus', '例：初稿待ち'));
-    tr.appendChild(editableCell(r.id, 'proofDeadline', 'MM/DD'));
-    tr.appendChild(editableCell(r.id, 'revisionDeadline', 'MM/DD'));
-    tr.appendChild(editableCell(r.id, 'notes', ''));
-
-    var linkTd = document.createElement('td');
-    var a = document.createElement('a');
-    a.href = r.sheetUrl;
-    a.target = '_blank';
-    a.className = 'link-btn';
-    a.textContent = '📄 シート';
-    linkTd.appendChild(a);
-    tr.appendChild(linkTd);
-
-    return tr;
   }
+  if (_changes[row.id] && _changes[row.id][field] !== undefined) inp.classList.add('changed');
+  inp.addEventListener('change', function() {
+    if (!inp.value) { row[field] = ''; markChange(row.id, field, ''); return; }
+    var d = new Date(inp.value);
+    var label = (d.getMonth()+1) + '/' + d.getDate();
+    row[field] = label;
+    markChange(row.id, field, label);
+    inp.classList.add('changed');
+    render();
+  });
+  return inp;
+}
 
-  function renderUrgent(rows) {
-    if (!rows) return;
-    var body = document.getElementById('urgent-body');
-    body.innerHTML = '';
-    var shown = 0;
-    rows.forEach(function(r) {
-      var status = getField(r.id, 'editorStatus');
-      if (r.handoverDone === '済み' && status !== '完了') {
-        body.appendChild(makeRow(r, true));
-        shown++;
-      }
+function makeRow(r, isUrgent) {
+  var tr = document.createElement('tr');
+  function td(text, cls) {
+    var el = document.createElement('td');
+    if (cls) { var s = document.createElement('span'); s.className = cls; s.textContent = text; el.appendChild(s); }
+    else el.textContent = text;
+    return el;
+  }
+  function tdi(el) { var d = document.createElement('td'); d.appendChild(el); return d; }
+
+  tr.appendChild(td(r.sheetName, 'channel'));
+  tr.appendChild(td(r.pubDate));
+  tr.appendChild(td(r.title));
+  if (!isUrgent) {
+    tr.appendChild(td(r.shootDate));
+    tr.appendChild(td(r.handoverDate));
+    tr.appendChild(td(r.handoverDone, r.handoverDone ? 'done' : ''));
+  }
+  tr.appendChild(td(r.editor));
+  tr.appendChild(td(r.draftDate));
+  tr.appendChild(tdi(editText(r, 'editorStatus', '例：初稿待ち')));
+  tr.appendChild(tdi(editDate(r, 'proofDeadline')));
+  tr.appendChild(tdi(editDate(r, 'revisionDeadline')));
+  tr.appendChild(tdi(editText(r, 'notes', '')));
+
+  var linkTd = document.createElement('td');
+  var a = document.createElement('a');
+  a.href = r.sheetUrl; a.target = '_blank'; a.className = 'link-btn'; a.textContent = '📄 シート';
+  linkTd.appendChild(a);
+  tr.appendChild(linkTd);
+  return tr;
+}
+
+function render() {
+  var urgentBody = document.getElementById('urgent-body');
+  var mainBody   = document.getElementById('main-body');
+  urgentBody.innerHTML = '';
+  mainBody.innerHTML   = '';
+
+  var urgentCount = 0;
+  BAKED_DATA.forEach(function(r) {
+    mainBody.appendChild(makeRow(r, false));
+    if (r.handoverDone === '済み' && r.editorStatus !== '完了') {
+      urgentBody.appendChild(makeRow(r, true));
+      urgentCount++;
+    }
+  });
+
+  if (urgentCount === 0)
+    urgentBody.innerHTML = '<tr><td colspan="10" class="empty">対応が必要な案件はありません ✅</td></tr>';
+  if (BAKED_DATA.length === 0)
+    mainBody.innerHTML   = '<tr><td colspan="13" class="empty">データがありません。Claude に「データ更新して」と伝えてください。</td></tr>';
+}
+
+function showCopy() {
+  var ids = Object.keys(_changes);
+  if (ids.length === 0) { alert('まだ変更はありません。'); return; }
+
+  var LABELS = { editorStatus:'編集者状況', proofDeadline:'添削期日', revisionDeadline:'修正期日', notes:'備考' };
+  var lines = ['以下の変更を BAKED_DATA に反映してコミットしてください。', ''];
+  ids.forEach(function(id) {
+    var row = BAKED_DATA.find(function(r){ return r.id === id; });
+    lines.push('id: ' + id + '  (' + (row ? row.sheetName + ' / ' + row.title : '') + ')');
+    Object.keys(_changes[id]).forEach(function(f) {
+      lines.push('  ' + (LABELS[f]||f) + ': ' + (_changes[id][f] || '（空欄）'));
     });
-    if (shown === 0) {
-      body.innerHTML = '<tr><td colspan="10" style="color:#444;text-align:center;padding:20px">対応が必要な案件はありません ✅</td></tr>';
-    }
-  }
+    lines.push('');
+  });
 
-  function renderMain(rows) {
-    var body = document.getElementById('main-body');
-    body.innerHTML = '';
-    if (rows.length === 0) {
-      body.innerHTML = '<tr><td colspan="13" style="color:#444;text-align:center;padding:20px">条件に合う案件がありません</td></tr>';
-      return;
-    }
-    rows.forEach(function(r) {
-      body.appendChild(makeRow(r, false));
-    });
-  }
+  document.getElementById('copy-text').value = lines.join('\n');
+  document.getElementById('copy-banner').style.display = 'block';
+  document.getElementById('copy-banner').scrollIntoView({behavior:'smooth'});
+}
 
-  async function fetchData() {
-    if (WEB_APP_URL === 'YOUR_WEB_APP_URL_HERE') {
-      document.getElementById('error-msg').style.display = 'block';
-      document.getElementById('error-msg').textContent = '⚠️ WEB_APP_URL が未設定です。上のセットアップ手順に従って設定してください。';
-      return;
-    }
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('error-msg').style.display = 'none';
-    document.getElementById('last-updated').textContent = '取得中…';
-    try {
-      var res = await fetch(WEB_APP_URL);
-      var rows = await res.json();
-      window._lastRows = rows;
-      renderMain(rows);
-      renderUrgent(rows);
-      document.getElementById('last-updated').textContent =
-        '最終取得: ' + new Date().toLocaleTimeString('ja-JP');
-    } catch(e) {
-      document.getElementById('error-msg').style.display = 'block';
-      document.getElementById('error-msg').textContent = '取得失敗: ' + e.message;
-      document.getElementById('last-updated').textContent = '取得失敗';
-    } finally {
-      document.getElementById('loading').style.display = 'none';
-    }
-  }
+function doCopy() {
+  var t = document.getElementById('copy-text');
+  navigator.clipboard.writeText(t.value).then(function() {
+    var btn = event.target;
+    btn.textContent = '✅ コピーしました';
+    setTimeout(function(){ btn.textContent = '📋 クリップボードにコピー'; }, 2000);
+  });
+}
 
-  fetchData();
+function resetChanges() {
+  _changes = {};
+  document.getElementById('change-count').textContent = '';
+  document.getElementById('copy-banner').style.display = 'none';
+  render();
+}
+
+render();
 </script>
 </body>
 </html>
