@@ -110,6 +110,8 @@
     .edit-text::placeholder, .edit-date:invalid { color: var(--muted); }
     .edit-date { min-width: 110px; cursor: pointer; }
     input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.4); cursor: pointer; }
+    input[type="date"]::-webkit-datetime-edit { color: transparent; }
+    input[type="date"].has-value::-webkit-datetime-edit { color: var(--text); }
 
     /* バッジ */
     .done    { background:rgba(255,106,26,.2);color:var(--orange);padding:2px 9px;border-radius:20px;font-size:.72rem;font-weight:700; }
@@ -499,15 +501,17 @@ function editDate(row, field) {
     var p = row[field].split('/');
     if (p.length === 2)
       inp.value = new Date().getFullYear() + '-' + p[0].padStart(2,'0') + '-' + p[1].padStart(2,'0');
+    inp.classList.add('has-value');
   }
   if (_changes[row.id] && _changes[row.id][field] !== undefined) inp.classList.add('changed');
   inp.addEventListener('change', function() {
-    if (!inp.value) { row[field] = ''; markChange(row.id, field, ''); render(); return; }
+    if (!inp.value) { row[field] = ''; markChange(row.id, field, ''); inp.classList.remove('has-value'); render(); return; }
     var d = new Date(inp.value + 'T00:00:00');
     var label = (d.getMonth()+1) + '/' + d.getDate();
     row[field] = label;
     markChange(row.id, field, label);
     inp.classList.add('changed');
+    inp.classList.add('has-value');
     render();
   });
   return inp;
