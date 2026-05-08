@@ -398,6 +398,37 @@ var BAKED_DATA = [
 var _rows = [];
 var _changes = {};
 
+var _CH_PALETTE = [
+  {bg:'rgba(255,106,26,.22)', color:'#ff8c4b', border:'rgba(255,106,26,.5)'},
+  {bg:'rgba(99,179,237,.2)',  color:'#63b3ed', border:'rgba(99,179,237,.45)'},
+  {bg:'rgba(104,211,145,.2)', color:'#68d391', border:'rgba(104,211,145,.45)'},
+  {bg:'rgba(183,148,244,.2)', color:'#b794f4', border:'rgba(183,148,244,.45)'},
+  {bg:'rgba(252,211,77,.18)', color:'#f6d860', border:'rgba(252,211,77,.45)'},
+];
+var _chColorMap = {};
+function chColor(name) {
+  if (!_chColorMap[name]) {
+    var idx = Object.keys(_chColorMap).length % _CH_PALETTE.length;
+    _chColorMap[name] = _CH_PALETTE[idx];
+  }
+  return _chColorMap[name];
+}
+
+function isUrgentRow(r) {
+  if (r.editorStatus === '完了') return false;
+  if (r.handoverDone === '済み') return true;
+  if (r.proofDeadline) {
+    var p = r.proofDeadline.split('/');
+    if (p.length === 2) {
+      var dl = new Date(new Date().getFullYear(), parseInt(p[0])-1, parseInt(p[1]));
+      var today = new Date(); today.setHours(0,0,0,0);
+      var diff = (dl - today) / 86400000;
+      if (diff >= 0 && diff <= 3) return true;
+    }
+  }
+  return false;
+}
+
 // JSONP でシートから取得
 function fetchSheet(cb) {
   var name = '_cb' + Date.now();
@@ -489,8 +520,14 @@ function makeRow(r, isUrgent) {
   var tr = document.createElement('tr');
   function td(v, cls) {
     var el = document.createElement('td');
-    if (cls) { var s = document.createElement('span'); s.className = cls; s.textContent = v; el.appendChild(s); }
-    else el.textContent = v;
+    if (cls) {
+      var s = document.createElement('span'); s.className = cls; s.textContent = v;
+      if (cls === 'channel') {
+        var c = chColor(v);
+        s.style.background = c.bg; s.style.color = c.color; s.style.borderColor = c.border;
+      }
+      el.appendChild(s);
+    } else el.textContent = v;
     return el;
   }
   function tdi(el) { var d = document.createElement('td'); d.appendChild(el); return d; }
@@ -521,7 +558,7 @@ function render() {
   var uc = 0;
   _rows.forEach(function(r) {
     mb.appendChild(makeRow(r, false));
-    if (r.handoverDone === '済み' && r.editorStatus !== '完了') {
+    if (isUrgentRow(r)) {
       ub.appendChild(makeRow(r, true)); uc++;
     }
   });
