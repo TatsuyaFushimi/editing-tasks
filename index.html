@@ -10,35 +10,46 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #f5f5f7;
       color: #1d1d1f;
-      padding: 24px 16px;
+      padding: 20px 16px 40px;
+      font-size: 13px;
     }
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 4px;
+    .top-bar {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
-    .updated {
+    h1 { font-size: 1.3rem; font-weight: 700; }
+    #last-updated { font-size: 0.78rem; color: #999; }
+    .refresh-btn {
+      margin-left: auto;
+      background: #0071e3;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 14px;
       font-size: 0.8rem;
-      color: #888;
-      margin-bottom: 24px;
+      cursor: pointer;
     }
-    h2 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 24px 0 10px;
-    }
-    .section-label {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-    .label-urgent { background: #fff0f0; color: #d00; border: 1px solid #fcc; }
-    .label-all    { background: #f0f4ff; color: #226; border: 1px solid #cdf; }
-    .label-done   { background: #f0fff4; color: #060; border: 1px solid #cec; }
+    .refresh-btn:hover { background: #0077ed; }
 
+    /* ---- セクションラベル ---- */
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin: 18px 0 8px;
+    }
+    .label-urgent { background: #fff0f0; color: #c00; border: 1px solid #fcc; }
+    .label-all    { background: #f0f4ff; color: #226; border: 1px solid #c8d8f8; }
+
+    /* ---- テーブル共通 ---- */
+    .wrap { width: 100%; overflow-x: auto; }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -46,153 +57,290 @@
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      font-size: 0.875rem;
-      margin-bottom: 8px;
+      min-width: 900px;
     }
     th {
       background: #f0f0f5;
-      padding: 10px 12px;
+      padding: 8px 10px;
       text-align: left;
+      font-size: 0.75rem;
       font-weight: 600;
-      font-size: 0.8rem;
       color: #555;
       white-space: nowrap;
     }
     td {
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-top: 1px solid #f0f0f0;
       vertical-align: middle;
       white-space: nowrap;
     }
     tr:hover td { background: #fafafa; }
 
-    .badge {
-      display: inline-block;
-      padding: 3px 9px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 600;
+    /* ---- 編集可能セル ---- */
+    td[contenteditable="true"] {
+      background: #f0f7ff;
+      cursor: text;
+      min-width: 80px;
+      border-radius: 4px;
+      outline: none;
     }
-    .s-blue   { background: #e8f0fe; color: #1a56db; }
-    .s-yellow { background: #fff8e1; color: #b45309; }
-    .s-orange { background: #fff3e0; color: #c2410c; }
-    .s-red    { background: #fde8e8; color: #b91c1c; }
-    .s-green  { background: #e8f5e9; color: #166534; }
-    .s-gray   { background: #f3f4f6; color: #6b7280; }
-    .s-warn   { background: #fef3c7; color: #92400e; }
+    td[contenteditable="true"]:focus {
+      background: #e0efff;
+      box-shadow: 0 0 0 2px #0071e3 inset;
+    }
+    td[contenteditable="true"]:empty::before {
+      content: attr(data-placeholder);
+      color: #bbb;
+      pointer-events: none;
+    }
 
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
+    /* ---- バッジ ---- */
+    .done  { background: #e8f5e9; color: #166534; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    .link-btn {
+      display: inline-block;
+      padding: 3px 10px;
+      background: #f0f0f5;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #444;
+      font-size: 0.75rem;
     }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.78rem;
-      color: #555;
+    .link-btn:hover { background: #e0e0ea; }
+
+    /* ---- ローディング ---- */
+    #loading {
+      text-align: center;
+      padding: 30px;
+      color: #888;
+      display: none;
     }
-    @media (max-width: 640px) {
-      table { font-size: 0.78rem; }
-      td, th { padding: 8px 8px; }
+    #error-msg {
+      background: #fff0f0;
+      border: 1px solid #fcc;
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #c00;
+      margin-top: 10px;
+      display: none;
     }
+
+    /* ---- 設定バナー ---- */
+    #setup-banner {
+      background: #fffbe6;
+      border: 1px solid #ffe58f;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    #setup-banner strong { color: #b45309; }
   </style>
 </head>
 <body>
 
+<div class="top-bar">
   <h1>編集D 添削タスク管理</h1>
-  <div class="updated">最終更新: 2026/05/08</div>
+  <span id="last-updated">未取得</span>
+  <button class="refresh-btn" onclick="fetchData()">🔄 更新</button>
+</div>
 
-  <!-- ⚡ 今すぐ対応が必要 -->
-  <span class="section-label label-urgent">⚡ 今すぐ対応が必要</span>
+<div id="setup-banner">
+  ⚙️ <strong>初回設定：</strong>
+  ① スプレッドシートを開き「拡張機能 → Apps Script」→ <code>Code.gs</code> の内容を貼り付けて保存<br>
+  ② 「デプロイ → 新しいデプロイ」→ 種類:ウェブアプリ / 実行:自分 / アクセス:全員 → URLをコピー<br>
+  ③ この HTML の <code>WEB_APP_URL</code> にそのURLを貼り付けて保存・git push
+  <br><small>※設定完了後このバナーを消してください（setup-banner要素を削除）</small>
+</div>
+
+<div id="loading">📡 スプレッドシートからデータ取得中…</div>
+<div id="error-msg"></div>
+
+<!-- ⚡ 今すぐ対応が必要 -->
+<div class="section-label label-urgent">⚡ 今すぐ対応が必要（引継ぎ済み・未完了）</div>
+<div class="wrap">
   <table id="urgent-table">
     <thead>
       <tr>
-        <th>動画名</th>
-        <th>対応内容</th>
-        <th>期日</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>サンプル動画A</td>
-        <td>添削する</td>
-        <td>2026/05/09</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- 📋 全体進捗 -->
-  <span class="section-label label-all">📋 全体進捗</span>
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>動画名</th>
-        <th>公開日</th>
-        <th>依頼日</th>
-        <th>初稿期日</th>
+        <th>公開予定日</th>
+        <th>タイトル</th>
+        <th>編集者</th>
+        <th>初稿予定</th>
+        <th>編集者状況</th>
         <th>添削期日</th>
         <th>修正期日</th>
-        <th>確認期日</th>
-        <th>ステータス</th>
+        <th>備考</th>
+        <th></th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td>1</td>
-        <td>サンプル動画A</td>
-        <td>05/20</td>
-        <td>05/01</td>
-        <td>05/07</td>
-        <td>05/09</td>
-        <td>05/12</td>
-        <td>05/14</td>
-        <td><span class="badge s-yellow">🟡 添削待ち</span></td>
-      </tr>
-      <tr>
-        <td>2</td>
-        <td>サンプル動画B</td>
-        <td>05/25</td>
-        <td>05/05</td>
-        <td>05/12</td>
-        <td>05/14</td>
-        <td>05/17</td>
-        <td>05/19</td>
-        <td><span class="badge s-blue">🔵 初稿待ち</span></td>
-      </tr>
+    <tbody id="urgent-body">
+      <tr><td colspan="9" style="color:#bbb;text-align:center;padding:16px">データ未取得</td></tr>
     </tbody>
   </table>
+</div>
 
-  <!-- ✅ 完了（今月） -->
-  <span class="section-label label-done">✅ 完了（今月）</span>
-  <table>
+<!-- 📋 全体一覧 -->
+<div class="section-label label-all">📋 全体一覧（伏見 担当 / 今日以降）</div>
+<div class="wrap">
+  <table id="main-table">
     <thead>
       <tr>
-        <th>#</th>
-        <th>動画名</th>
-        <th>公開日</th>
-        <th>完了日</th>
+        <th>公開予定日</th>
+        <th>タイトル</th>
+        <th>撮影予定日</th>
+        <th>引継日</th>
+        <th>引継ぎ</th>
+        <th>編集者</th>
+        <th>初稿予定</th>
+        <th>編集者状況</th>
+        <th>添削期日</th>
+        <th>修正期日</th>
+        <th>備考</th>
+        <th></th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td colspan="4" style="color:#aaa; text-align:center; padding:16px;">まだありません</td>
-      </tr>
+    <tbody id="main-body">
+      <tr><td colspan="12" style="color:#bbb;text-align:center;padding:16px">データ未取得</td></tr>
     </tbody>
   </table>
+</div>
 
-  <!-- 凡例 -->
-  <div class="legend">
-    <div class="legend-item"><span class="badge s-blue">🔵 初稿待ち</span> 編集Dが作成中</div>
-    <div class="legend-item"><span class="badge s-yellow">🟡 添削待ち</span> 自分が添削する</div>
-    <div class="legend-item"><span class="badge s-orange">🟠 修正待ち</span> 編集Dが修正中</div>
-    <div class="legend-item"><span class="badge s-red">🔴 確認待ち</span> 自分が確認する</div>
-    <div class="legend-item"><span class="badge s-green">✅ 完了</span></div>
-    <div class="legend-item"><span class="badge s-warn">⚠️ 期日超過</span></div>
-  </div>
+<script>
+  // ▼▼▼ デプロイ後にここを書き換えてください ▼▼▼
+  var WEB_APP_URL = 'YOUR_WEB_APP_URL_HERE';
+  // ▲▲▲
 
+  var STORAGE_KEY = 'editing_tasks_local';
+
+  function getLocal() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  }
+  function saveField(id, field, value) {
+    var d = getLocal();
+    if (!d[id]) d[id] = {};
+    d[id][field] = value;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+  }
+  function getField(id, field) {
+    var d = getLocal();
+    return (d[id] && d[id][field]) ? d[id][field] : '';
+  }
+
+  function editableCell(id, field, placeholder) {
+    var td = document.createElement('td');
+    td.contentEditable = 'true';
+    td.setAttribute('data-placeholder', placeholder || '');
+    td.textContent = getField(id, field);
+    td.addEventListener('blur', function() {
+      saveField(id, field, td.textContent.trim());
+      renderUrgent(window._lastRows);
+    });
+    return td;
+  }
+
+  function makeRow(r, isUrgent) {
+    var tr = document.createElement('tr');
+    function td(text, cls) {
+      var el = document.createElement('td');
+      if (cls) {
+        var span = document.createElement('span');
+        span.className = cls;
+        span.textContent = text;
+        el.appendChild(span);
+      } else {
+        el.textContent = text;
+      }
+      return el;
+    }
+
+    if (!isUrgent) {
+      tr.appendChild(td(r.pubDate));
+      tr.appendChild(td(r.title));
+      tr.appendChild(td(r.shootDate));
+      tr.appendChild(td(r.handoverDate));
+      tr.appendChild(td(r.handoverDone, r.handoverDone ? 'done' : ''));
+      tr.appendChild(td(r.editor));
+      tr.appendChild(td(r.draftDate));
+    } else {
+      tr.appendChild(td(r.pubDate));
+      tr.appendChild(td(r.title));
+      tr.appendChild(td(r.editor));
+      tr.appendChild(td(r.draftDate));
+    }
+
+    tr.appendChild(editableCell(r.id, 'editorStatus', '例：初稿待ち'));
+    tr.appendChild(editableCell(r.id, 'proofDeadline', 'MM/DD'));
+    tr.appendChild(editableCell(r.id, 'revisionDeadline', 'MM/DD'));
+    tr.appendChild(editableCell(r.id, 'notes', ''));
+
+    var linkTd = document.createElement('td');
+    var a = document.createElement('a');
+    a.href = r.sheetUrl;
+    a.target = '_blank';
+    a.className = 'link-btn';
+    a.textContent = '📄 シート';
+    linkTd.appendChild(a);
+    tr.appendChild(linkTd);
+
+    return tr;
+  }
+
+  function renderUrgent(rows) {
+    if (!rows) return;
+    var body = document.getElementById('urgent-body');
+    body.innerHTML = '';
+    var shown = 0;
+    rows.forEach(function(r) {
+      var status = getField(r.id, 'editorStatus');
+      if (r.handoverDone === '済み' && status !== '完了') {
+        body.appendChild(makeRow(r, true));
+        shown++;
+      }
+    });
+    if (shown === 0) {
+      body.innerHTML = '<tr><td colspan="9" style="color:#bbb;text-align:center;padding:16px">対応が必要な案件はありません ✅</td></tr>';
+    }
+  }
+
+  function renderMain(rows) {
+    var body = document.getElementById('main-body');
+    body.innerHTML = '';
+    if (rows.length === 0) {
+      body.innerHTML = '<tr><td colspan="12" style="color:#bbb;text-align:center;padding:16px">条件に合う案件がありません</td></tr>';
+      return;
+    }
+    rows.forEach(function(r) {
+      body.appendChild(makeRow(r, false));
+    });
+  }
+
+  async function fetchData() {
+    if (WEB_APP_URL === 'YOUR_WEB_APP_URL_HERE') {
+      document.getElementById('error-msg').style.display = 'block';
+      document.getElementById('error-msg').textContent = '⚠️ WEB_APP_URL が未設定です。上のセットアップ手順に従って設定してください。';
+      return;
+    }
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('error-msg').style.display = 'none';
+    document.getElementById('last-updated').textContent = '取得中…';
+    try {
+      var res = await fetch(WEB_APP_URL);
+      var rows = await res.json();
+      window._lastRows = rows;
+      renderMain(rows);
+      renderUrgent(rows);
+      document.getElementById('last-updated').textContent =
+        '最終取得: ' + new Date().toLocaleTimeString('ja-JP');
+    } catch(e) {
+      document.getElementById('error-msg').style.display = 'block';
+      document.getElementById('error-msg').textContent = '取得失敗: ' + e.message;
+      document.getElementById('last-updated').textContent = '取得失敗';
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+    }
+  }
+
+  fetchData();
+</script>
 </body>
 </html>
