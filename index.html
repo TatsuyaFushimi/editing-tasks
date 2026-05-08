@@ -6,140 +6,186 @@
   <title>編集D 添削タスク管理</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #111214;
+      --surface:   #1a1c20;
+      --surface2:  #222428;
+      --border:    #2e3035;
+      --orange:    #ff6a1a;
+      --orange-dim:#7a3210;
+      --text:      #e0e0e0;
+      --text-sub:  #777;
+      --text-muted:#444;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f7;
-      color: #1d1d1f;
-      padding: 20px 16px 40px;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px 16px 60px;
       font-size: 13px;
     }
+
+    /* ---- トップバー ---- */
     .top-bar {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
     }
-    h1 { font-size: 1.3rem; font-weight: 700; }
-    #last-updated { font-size: 0.78rem; color: #999; }
+    .logo-dot {
+      width: 10px; height: 10px;
+      background: var(--orange);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--orange);
+      flex-shrink: 0;
+    }
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #fff;
+    }
+    #last-updated { font-size: 0.75rem; color: var(--text-sub); }
     .refresh-btn {
       margin-left: auto;
-      background: #0071e3;
+      background: var(--orange);
       color: #fff;
       border: none;
       border-radius: 8px;
-      padding: 6px 14px;
-      font-size: 0.8rem;
+      padding: 6px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
       cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: opacity .15s;
     }
-    .refresh-btn:hover { background: #0077ed; }
+    .refresh-btn:hover { opacity: 0.85; }
 
     /* ---- セクションラベル ---- */
     .section-label {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 3px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin: 18px 0 8px;
+      gap: 7px;
+      padding: 4px 14px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin: 22px 0 10px;
     }
-    .label-urgent { background: #fff0f0; color: #c00; border: 1px solid #fcc; }
-    .label-all    { background: #f0f4ff; color: #226; border: 1px solid #c8d8f8; }
+    .label-urgent {
+      background: rgba(255,106,26,.15);
+      color: var(--orange);
+      border-left: 3px solid var(--orange);
+    }
+    .label-all {
+      background: rgba(255,255,255,.04);
+      color: #aaa;
+      border-left: 3px solid #444;
+    }
 
-    /* ---- テーブル共通 ---- */
+    /* ---- テーブル ---- */
     .wrap { width: 100%; overflow-x: auto; }
     table {
       width: 100%;
       border-collapse: collapse;
-      background: #fff;
+      background: var(--surface);
       border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
       min-width: 900px;
+      border: 1px solid var(--border);
     }
     th {
-      background: #f0f0f5;
-      padding: 8px 10px;
+      background: var(--surface2);
+      padding: 9px 12px;
       text-align: left;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #555;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       white-space: nowrap;
+      border-bottom: 1px solid var(--border);
     }
     td {
-      padding: 8px 10px;
-      border-top: 1px solid #f0f0f0;
+      padding: 9px 12px;
+      border-top: 1px solid var(--border);
       vertical-align: middle;
       white-space: nowrap;
+      color: var(--text);
     }
-    tr:hover td { background: #fafafa; }
+    tr:hover td { background: rgba(255,255,255,.03); }
 
     /* ---- 編集可能セル ---- */
     td[contenteditable="true"] {
-      background: #f0f7ff;
+      background: rgba(255,106,26,.07);
       cursor: text;
       min-width: 80px;
       border-radius: 4px;
       outline: none;
+      transition: background .15s;
     }
     td[contenteditable="true"]:focus {
-      background: #e0efff;
-      box-shadow: 0 0 0 2px #0071e3 inset;
+      background: rgba(255,106,26,.15);
+      box-shadow: 0 0 0 2px var(--orange) inset;
     }
     td[contenteditable="true"]:empty::before {
       content: attr(data-placeholder);
-      color: #bbb;
+      color: var(--text-muted);
       pointer-events: none;
     }
 
     /* ---- バッジ ---- */
-    .done  { background: #e8f5e9; color: #166534; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    .done {
+      background: rgba(255,106,26,.2);
+      color: var(--orange);
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
     .link-btn {
       display: inline-block;
-      padding: 3px 10px;
-      background: #f0f0f5;
+      padding: 3px 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
       border-radius: 6px;
       text-decoration: none;
-      color: #444;
-      font-size: 0.75rem;
+      color: #aaa;
+      font-size: 0.72rem;
+      transition: border-color .15s, color .15s;
     }
-    .link-btn:hover { background: #e0e0ea; }
+    .link-btn:hover { border-color: var(--orange); color: var(--orange); }
 
-    /* ---- ローディング ---- */
+    /* ---- ローディング / エラー ---- */
     #loading {
       text-align: center;
       padding: 30px;
-      color: #888;
+      color: var(--text-sub);
       display: none;
     }
     #error-msg {
-      background: #fff0f0;
-      border: 1px solid #fcc;
+      background: rgba(255,60,60,.1);
+      border: 1px solid rgba(255,60,60,.3);
       border-radius: 8px;
       padding: 12px 16px;
-      color: #c00;
+      color: #ff6b6b;
       margin-top: 10px;
       display: none;
     }
-
-    /* ---- 設定バナー ---- */
-    #setup-banner {
-      background: #fffbe6;
-      border: 1px solid #ffe58f;
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 16px;
-      font-size: 0.82rem;
-      line-height: 1.6;
-    }
-    #setup-banner strong { color: #b45309; }
   </style>
 </head>
 <body>
 
 <div class="top-bar">
+  <div class="logo-dot"></div>
   <h1>編集D 添削タスク管理</h1>
   <span id="last-updated">未取得</span>
   <button class="refresh-btn" onclick="fetchData()">🔄 更新</button>
@@ -167,7 +213,7 @@
       </tr>
     </thead>
     <tbody id="urgent-body">
-      <tr><td colspan="9" style="color:#bbb;text-align:center;padding:16px">データ未取得</td></tr>
+      <tr><td colspan="9" style="color:#444;text-align:center;padding:20px">データ未取得</td></tr>
     </tbody>
   </table>
 </div>
@@ -193,7 +239,7 @@
       </tr>
     </thead>
     <tbody id="main-body">
-      <tr><td colspan="12" style="color:#bbb;text-align:center;padding:16px">データ未取得</td></tr>
+      <tr><td colspan="12" style="color:#444;text-align:center;padding:20px">データ未取得</td></tr>
     </tbody>
   </table>
 </div>
@@ -291,7 +337,7 @@
       }
     });
     if (shown === 0) {
-      body.innerHTML = '<tr><td colspan="9" style="color:#bbb;text-align:center;padding:16px">対応が必要な案件はありません ✅</td></tr>';
+      body.innerHTML = '<tr><td colspan="9" style="color:#444;text-align:center;padding:20px">対応が必要な案件はありません ✅</td></tr>';
     }
   }
 
@@ -299,7 +345,7 @@
     var body = document.getElementById('main-body');
     body.innerHTML = '';
     if (rows.length === 0) {
-      body.innerHTML = '<tr><td colspan="12" style="color:#bbb;text-align:center;padding:16px">条件に合う案件がありません</td></tr>';
+      body.innerHTML = '<tr><td colspan="12" style="color:#444;text-align:center;padding:20px">条件に合う案件がありません</td></tr>';
       return;
     }
     rows.forEach(function(r) {
