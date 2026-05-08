@@ -53,9 +53,14 @@ function doGet(e) {
 
   result.sort(function(a, b) { return a.pubDateMs - b.pubDateMs; });
 
-  var output = ContentService.createTextOutput(JSON.stringify(result));
-  output.setMimeType(ContentService.MimeType.JSON);
-  return output;
+  var json = JSON.stringify(result);
+  var cb = e && e.parameter && e.parameter.callback;
+  if (cb) {
+    return ContentService.createTextOutput(cb + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function fmt(v) {
