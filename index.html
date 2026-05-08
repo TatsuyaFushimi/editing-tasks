@@ -145,13 +145,6 @@
   <button class="refresh-btn" onclick="fetchData()">🔄 更新</button>
 </div>
 
-<div id="setup-banner">
-  ⚙️ <strong>初回設定：</strong>
-  ① スプレッドシートを開き「拡張機能 → Apps Script」→ <code>Code.gs</code> の内容を貼り付けて保存<br>
-  ② 「デプロイ → 新しいデプロイ」→ 種類:ウェブアプリ / 実行:自分 / アクセス:全員 → URLをコピー<br>
-  ③ この HTML の <code>WEB_APP_URL</code> にそのURLを貼り付けて保存・git push
-  <br><small>※設定完了後このバナーを消してください（setup-banner要素を削除）</small>
-</div>
 
 <div id="loading">📡 スプレッドシートからデータ取得中…</div>
 <div id="error-msg"></div>
@@ -207,7 +200,7 @@
 
 <script>
   // ▼▼▼ デプロイ後にここを書き換えてください ▼▼▼
-  var WEB_APP_URL = 'YOUR_WEB_APP_URL_HERE';
+  var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxBj3IzsoqGLzBKD5JdRnJLVaGxZHba8vys5Pi3auTUNdOyQd1qFw40QIXGyXTsCaXd/exec';
   // ▲▲▲
 
   var STORAGE_KEY = 'editing_tasks_local';
