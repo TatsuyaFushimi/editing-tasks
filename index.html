@@ -44,10 +44,10 @@
 
     /* ナビカード */
     .nav-cards {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
       margin-bottom: 28px;
     }
-    @media (max-width: 480px) { .nav-cards { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .nav-cards { grid-template-columns: 1fr; } }
     .nav-card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 12px; padding: 18px 20px;
@@ -75,6 +75,7 @@
     .label-urgent { background:rgba(255,106,26,.15); color:var(--orange); border-left:3px solid var(--orange); }
     .label-video  { background:rgba(99,179,237,.1); color:#63b3ed; border-left:3px solid #63b3ed; }
     .label-other  { background:rgba(104,211,145,.1); color:#68d391; border-left:3px solid #68d391; }
+    .label-cal    { background:rgba(99,179,237,.1); color:#63b3ed; border-left:3px solid #63b3ed; }
 
     /* テーブル */
     .wrap { width:100%; overflow-x:auto; }
@@ -167,6 +168,28 @@
       <span class="nav-card-arrow">→</span>
     </div>
   </a>
+  <a class="nav-card" href="other-tasks.html#calendar">
+    <div class="nav-card-left">
+      <span class="nav-card-label">CALENDAR</span>
+      <span class="nav-card-title">直近の準備</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="nav-card-count" id="cal-count" style="color:#63b3ed">…</span>
+      <span class="nav-card-arrow">→</span>
+    </div>
+  </a>
+</div>
+
+<div id="cal-section" style="display:none">
+  <div class="section-label label-cal">📅 直近の準備が必要な予定</div>
+  <div class="wrap">
+    <table>
+      <thead><tr>
+        <th>イベント名</th><th>日付</th><th>時刻</th><th>準備内容</th>
+      </tr></thead>
+      <tbody id="cal-body"></tbody>
+    </table>
+  </div>
 </div>
 
 <div class="section-label label-urgent">⚡ 今すぐ対応が必要</div>
@@ -287,6 +310,55 @@ function statusClass(s) {
   if (s === '待ち') return 's-wait';
   if (s === '完了') return 's-done';
   return 's-todo';
+}
+
+function renderCalendarSection(events) {
+  var known = (events || []).filter(function(e){ return !e.unknown; });
+  if (!known.length) return;
+  document.getElementById('cal-section').style.display = '';
+  var tbody = document.getElementById('cal-body');
+  tbody.innerHTML = '';
+  known.forEach(function(ev) {
+    var dayLabel = ev.daysUntil === 0 ? '今日' : ev.daysUntil === 1 ? '明日' : ev.daysUntil + '日後';
+    var tr = document.createElement('tr');
+
+    var t1 = document.createElement('td');
+    t1.textContent = ev.title;
+    tr.appendChild(t1);
+
+    var t2 = document.createElement('td');
+    t2.textContent = ev.eventDate + '（' + dayLabel + '）';
+    if (ev.daysUntil <= 1) t2.style.color = 'var(--orange)';
+    tr.appendChild(t2);
+
+    var t3 = document.createElement('td');
+    t3.textContent = ev.startTime || '—';
+    t3.style.color = 'var(--sub)';
+    tr.appendChild(t3);
+
+    var t4 = document.createElement('td');
+    t4.innerHTML = '<span style="color:#63b3ed;font-weight:600">' + ev.prepLabel + '</span>';
+    tr.appendChild(t4);
+
+    tbody.appendChild(tr);
+  });
+}
+
+function fetchCalendar(cb) {
+  var name = '_calCb' + Date.now();
+  var sc = document.createElement('script');
+  window[name] = function(data) {
+    delete window[name];
+    if (sc.parentNode) sc.parentNode.removeChild(sc);
+    cb(null, data);
+  };
+  sc.onerror = function() {
+    delete window[name];
+    if (sc.parentNode) sc.parentNode.removeChild(sc);
+    cb(new Error('load error'));
+  };
+  sc.src = WEB_APP_URL + '?type=calendar&callback=' + name;
+  document.head.appendChild(sc);
 }
 
 function fetchSheet(cb) {
@@ -526,6 +598,13 @@ function renderOther() {
     tbody.appendChild(tr);
   });
 }
+
+fetchCalendar(function(err, events) {
+  if (err) { document.getElementById('cal-count').textContent = '!'; return; }
+  var n = (events || []).filter(function(e){ return !e.unknown; }).length;
+  document.getElementById('cal-count').textContent = n;
+  if (n > 0) renderCalendarSection(events);
+});
 
 init();
 </script>
