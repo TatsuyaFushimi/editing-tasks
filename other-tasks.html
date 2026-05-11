@@ -74,6 +74,7 @@
       margin: 22px 0 10px;
     }
     .label-active { background:rgba(104,211,145,.1); color:var(--green); border-left:3px solid var(--green); }
+    .label-cal    { background:rgba(99,179,237,.1); color:#63b3ed; border-left:3px solid #63b3ed; }
     .label-done   { background:rgba(255,255,255,.04); color:#555; border-left:3px solid #333; }
 
     /* テーブル */
@@ -166,6 +167,16 @@
     <button class="btn btn-ghost" onclick="resetChanges()">変更をリセット</button>
     <button class="btn btn-ghost" onclick="document.getElementById('copy-banner').style.display='none'">閉じる</button>
   </div>
+</div>
+
+<div class="section-label label-cal">📅 カレンダー準備（7日以内）</div>
+<div class="wrap">
+  <table>
+    <thead><tr>
+      <th>イベント名</th><th>日付</th><th>時刻</th><th>準備内容</th>
+    </tr></thead>
+    <tbody id="cal-body"></tbody>
+  </table>
 </div>
 
 <div class="section-label label-active">📋 アクティブ</div>
@@ -355,7 +366,74 @@ function resetChanges() {
   render();
 }
 
+function fetchCalendar(cb) {
+  var name = '_calCb' + Date.now();
+  var sc = document.createElement('script');
+  window[name] = function(data) {
+    delete window[name];
+    if (sc.parentNode) sc.parentNode.removeChild(sc);
+    cb(null, data);
+  };
+  sc.onerror = function() {
+    delete window[name];
+    if (sc.parentNode) sc.parentNode.removeChild(sc);
+    cb(new Error('load error'));
+  };
+  sc.src = WEB_APP_URL + '?type=calendar&callback=' + name;
+  document.head.appendChild(sc);
+}
+
+function renderCalendar(events) {
+  var tbody = document.getElementById('cal-body');
+  tbody.innerHTML = '';
+  if (!events || !events.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty" style="padding:14px">準備が必要な予定はありません</td></tr>';
+    return;
+  }
+  events.forEach(function(ev) {
+    var tr = document.createElement('tr');
+    var dayLabel = ev.daysUntil === 0 ? '今日' : ev.daysUntil === 1 ? '明日' : ev.daysUntil + '日後';
+
+    var titleTd = document.createElement('td');
+    if (ev.unknown) {
+      var badge = document.createElement('span');
+      badge.textContent = '❓';
+      badge.title = '準備必要か未確認';
+      badge.style.marginRight = '6px';
+      titleTd.appendChild(badge);
+    }
+    titleTd.appendChild(document.createTextNode(ev.title));
+    tr.appendChild(titleTd);
+
+    var dateTd = document.createElement('td');
+    dateTd.textContent = ev.eventDate + '（' + dayLabel + '）';
+    if (ev.daysUntil <= 1) dateTd.style.color = 'var(--orange)';
+    tr.appendChild(dateTd);
+
+    function simpleTd(v, clr) {
+      var td = document.createElement('td');
+      td.textContent = v || '—';
+      if (clr) td.style.color = clr;
+      return td;
+    }
+    tr.appendChild(simpleTd(ev.startTime, 'var(--sub)'));
+
+    var prepTd = document.createElement('td');
+    if (ev.unknown) {
+      prepTd.innerHTML = '<span style="color:var(--sub);font-size:.78rem">未確認 — Claude に確認依頼</span>';
+    } else {
+      prepTd.innerHTML = '<span style="color:#63b3ed;font-weight:600">' + ev.prepLabel + '</span>';
+    }
+    tr.appendChild(prepTd);
+
+    tbody.appendChild(tr);
+  });
+}
+
 render();
+fetchCalendar(function(err, events) {
+  renderCalendar(err ? [] : events);
+});
 </script>
 </body>
 </html>
