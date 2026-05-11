@@ -35,7 +35,7 @@
     .btn {
       border: none; border-radius: 8px; padding: 6px 14px;
       font-size: 0.78rem; font-weight: 600; cursor: pointer;
-      letter-spacing: .03em; transition: opacity .15s;
+      letter-spacing: .03em; transition: opacity .15s; text-decoration: none;
     }
     .btn:hover { opacity: .8; }
     .btn-orange { background: var(--orange); color: #fff; }
@@ -142,6 +142,8 @@
   <span id="status" style="font-size:.75rem;color:var(--sub)">読み込み中…</span>
   <span id="change-count" style="font-size:.78rem;color:var(--orange)"></span>
   <div class="spacer"></div>
+  <a href="https://calendar.google.com/calendar/u/0/r/week" target="_blank" class="btn btn-ghost">📅 カレンダー</a>
+  <a href="https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit?gid=706953571#gid=706953571" target="_blank" class="btn btn-ghost">📊 制作管理</a>
   <button class="btn btn-ghost" id="copy-btn" onclick="showCopy()">📋 変更をコピー</button>
   <a href="index.html" class="back-link">← ホーム</a>
 </div>
