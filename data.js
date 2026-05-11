@@ -1,4 +1,4 @@
-var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyC_YDifiY7qnQXxrlYorz9tow6vwcnT3S5O-OACE8jz93Htlc6rTrkxC6Hwn8rl8dE/exec';
+var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxsgU-XR_vNArCYnluEsXFlmhQBmAVXIw_zQDMJs_cZ4HwinmhuRU76XTJsBO4NG2WT/exec';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 動画タスクデータ（Claude が更新）
