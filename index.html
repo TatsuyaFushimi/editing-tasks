@@ -583,7 +583,19 @@ function renderOther() {
       return el;
     }
 
-    tr.appendChild(td(t.title));
+    var titleTd = document.createElement('td');
+    if (t.url) {
+      var a = document.createElement('a');
+      a.href = t.url; a.target = '_blank'; a.textContent = t.title || '—';
+      a.style.cssText = 'color:var(--text);text-decoration:none;';
+      var lnk = document.createElement('span');
+      lnk.textContent = ' 🔗'; lnk.style.cssText = 'font-size:.75rem;opacity:.5;';
+      a.appendChild(lnk);
+      titleTd.appendChild(a);
+    } else {
+      titleTd.textContent = t.title || '—';
+    }
+    tr.appendChild(titleTd);
 
     var dlTd = td(t.deadline || '—');
     if (isOtherUrgent(t)) dlTd.style.color = 'var(--orange)';

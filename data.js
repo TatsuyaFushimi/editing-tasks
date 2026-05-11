@@ -218,4 +218,25 @@ var BAKED_DATA = [
 // { id, title, deadline, category, status, notes, createdDate }
 // status: 未着手 / 対応中 / 待ち / 完了
 // category: 連絡 / 確認 / 作業 / 企画 / その他
-var OTHER_TASKS = [];
+var OTHER_TASKS = [
+  {
+    "id": "other_001",
+    "title": "Slack添削①",
+    "url": "https://fmclub.slack.com/archives/C08EHBETT17/p1778475024607399?thread_ts=1778474885.789889&cid=C08EHBETT17",
+    "deadline": "",
+    "category": "作業",
+    "status": "未着手",
+    "notes": "",
+    "createdDate": "5/11"
+  },
+  {
+    "id": "other_002",
+    "title": "Slack添削②",
+    "url": "https://fmclub.slack.com/archives/C08EHBETT17/p1778459993173289?thread_ts=1777536681.905599&cid=C08EHBETT17",
+    "deadline": "",
+    "category": "作業",
+    "status": "未着手",
+    "notes": "",
+    "createdDate": "5/11"
+  }
+];

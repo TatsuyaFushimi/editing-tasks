@@ -283,7 +283,16 @@ function makeActiveRow(task) {
   var tr = document.createElement('tr');
   function tdi(el) { var d = document.createElement('td'); d.appendChild(el); return d; }
 
-  tr.appendChild(tdi(editText(task, 'title', 'タスク名')));
+  var titleTd = document.createElement('td');
+  titleTd.appendChild(editText(task, 'title', 'タスク名'));
+  if (task.url) {
+    var a = document.createElement('a');
+    a.href = task.url; a.target = '_blank';
+    a.textContent = '🔗'; a.title = task.url;
+    a.style.cssText = 'margin-left:6px;font-size:.85rem;text-decoration:none;opacity:.7;';
+    titleTd.appendChild(a);
+  }
+  tr.appendChild(titleTd);
   tr.appendChild(tdi(editDate(task, 'deadline')));
   tr.appendChild(tdi(editSelect(task, 'category', CATEGORIES)));
   tr.appendChild(tdi(editSelect(task, 'status', STATUSES)));
@@ -327,7 +336,16 @@ function render() {
         el.textContent = v || '—';
         return el;
       }
-      tr.appendChild(td(t.title));
+      var titleEl = document.createElement('td');
+      if (t.url) {
+        var a = document.createElement('a');
+        a.href = t.url; a.target = '_blank'; a.textContent = t.title || '—';
+        a.style.cssText = 'color:var(--sub);text-decoration:none;';
+        titleEl.appendChild(a);
+      } else {
+        titleEl.textContent = t.title || '—';
+      }
+      tr.appendChild(titleEl);
       tr.appendChild(td(t.deadline));
       tr.appendChild(td(t.category));
       tr.appendChild(td(t.notes));
