@@ -79,9 +79,9 @@ var BAKED_DATA = [
     "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A68",
     "sheetName": "成田ch",
     "editorStatus": "初稿",
-    "proofDeadline": "5/11",
+    "proofDeadline": "5/12",
     "revisionDeadline": "5/17",
-    "notes": "月曜添削予定"
+    "notes": "5/12中に必ず"
   },
   {
     "id": "成田ch_68",
