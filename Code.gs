@@ -90,7 +90,7 @@ function doGetCalendar(e) {
     var matched = false;
     for (var i = 0; i < CAL_RULES.length; i++) {
       var rule = CAL_RULES[i];
-      if (title.indexOf(rule.pattern) !== -1 && daysUntil <= rule.daysAhead) {
+      if (title.toLowerCase().indexOf(rule.pattern.toLowerCase()) !== -1 && daysUntil <= rule.daysAhead) {
         result.push({
           title:      title,
           eventDate:  fmt(start),
