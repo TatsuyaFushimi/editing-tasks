@@ -175,7 +175,7 @@
     <thead><tr>
       <th>イベント名</th><th>日付</th><th>時刻</th><th>準備内容</th>
     </tr></thead>
-    <tbody id="cal-body"></tbody>
+    <tbody id="cal-body"><tr><td colspan="4" style="color:var(--sub);padding:14px;text-align:center">読み込み中…</td></tr></tbody>
   </table>
 </div>
 
@@ -432,7 +432,12 @@ function renderCalendar(events) {
 
 render();
 fetchCalendar(function(err, events) {
-  renderCalendar(err ? [] : events);
+  if (err) {
+    document.getElementById('cal-body').innerHTML =
+      '<tr><td colspan="4" style="color:var(--sub);padding:14px;text-align:center">⚠ カレンダー取得失敗</td></tr>';
+    return;
+  }
+  renderCalendar(events);
 });
 </script>
 </body>
