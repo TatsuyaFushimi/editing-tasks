@@ -7,7 +7,7 @@ var SHEET_ID = '1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4';
 var CAL_RULES = [
   { pattern: 'Ch',           daysAhead: 7, type: '定例MTG',   prepLabel: 'FBの準備'       },
   { pattern: 'HIRAIさんMTG', daysAhead: 7, type: '定例MTG',   prepLabel: '資料準備＋早起き' },
-  { pattern: 'ナレッジ',      daysAhead: 3, type: 'ナレッジ',  prepLabel: '準備'            },
+  { pattern: 'ナレッジ',      daysAhead: 3, type: 'ナレッジ',  prepLabel: '資料準備'         },
   { pattern: '1on1',         daysAhead: 1, type: '1on1',      prepLabel: '準備'            },
 ];
 
