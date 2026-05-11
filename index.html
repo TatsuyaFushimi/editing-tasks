@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23111214'/><path d='M4 11L4 4L11 4' fill='none' stroke='%23ff6a1a' stroke-width='1' opacity='0.7'/><path d='M21 4L28 4L28 11' fill='none' stroke='%23ff6a1a' stroke-width='1' opacity='0.7'/><path d='M4 21L4 28L11 28' fill='none' stroke='%23ff6a1a' stroke-width='1' opacity='0.7'/><path d='M21 28L28 28L28 21' fill='none' stroke='%23ff6a1a' stroke-width='1' opacity='0.7'/><circle cx='9' cy='24' r='3.5' fill='none' stroke='%23ff6a1a' stroke-width='1.5'/><circle cx='23' cy='24' r='3.5' fill='none' stroke='%23ff6a1a' stroke-width='1.5'/><circle cx='16' cy='16' r='2.5' fill='%23ff6a1a' opacity='0.3'/><circle cx='16' cy='16' r='1.5' fill='%23ff6a1a'/><line x1='11.5' y1='21' x2='21' y2='8' stroke='%23ff6a1a' stroke-width='1.8' stroke-linecap='round'/><line x1='20.5' y1='21' x2='11' y2='8' stroke='%23ff6a1a' stroke-width='1.8' stroke-linecap='round'/></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>編集D 添削タスク管理</title>
+  <title>タスク管理</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -25,13 +25,9 @@
       font-size: 13px;
     }
     .top-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 16px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px; border-bottom: 1px solid var(--border);
+      padding-bottom: 16px; flex-wrap: wrap;
     }
     .dot { width:10px;height:10px;background:var(--orange);border-radius:50%;box-shadow:0 0 8px var(--orange);flex-shrink:0; }
     h1 { font-size:1.15rem;font-weight:700;color:#fff;letter-spacing:.02em; }
@@ -39,28 +35,35 @@
     .btn {
       border: none; border-radius: 8px; padding: 6px 14px;
       font-size: 0.78rem; font-weight: 600; cursor: pointer;
-      letter-spacing: .03em; transition: opacity .15s;
+      letter-spacing: .03em; transition: opacity .15s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 5px;
     }
     .btn:hover { opacity: .8; }
     .btn-orange { background: var(--orange); color: #fff; }
     .btn-ghost  { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
 
-    /* コピーバナー */
-    #copy-banner {
-      display: none;
-      background: var(--surface);
-      border: 1px solid var(--orange);
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin-bottom: 16px;
+    /* ナビカード */
+    .nav-cards {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      margin-bottom: 28px;
     }
-    #copy-banner p { font-size:.78rem; color: var(--sub); margin-bottom: 8px; }
-    #copy-text {
-      width:100%; background: var(--bg); color: var(--text);
-      border: 1px solid var(--border); border-radius: 6px;
-      padding: 10px; font-size:.8rem; font-family: monospace;
-      resize: vertical; min-height: 80px;
+    @media (max-width: 480px) { .nav-cards { grid-template-columns: 1fr; } }
+    .nav-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+      text-decoration: none; color: var(--text);
+      display: flex; align-items: center; justify-content: space-between;
+      transition: border-color .2s, background .2s;
     }
+    .nav-card:hover { border-color: var(--orange); background: var(--surface2); }
+    .nav-card-left { display: flex; flex-direction: column; gap: 4px; }
+    .nav-card-label { font-size: .72rem; color: var(--sub); letter-spacing: .05em; text-transform: uppercase; }
+    .nav-card-title { font-size: 1rem; font-weight: 700; color: #fff; }
+    .nav-card-count {
+      font-size: 1.8rem; font-weight: 700; color: var(--orange);
+      line-height: 1;
+    }
+    .nav-card-arrow { font-size: 1.1rem; color: var(--sub); }
 
     /* セクションラベル */
     .section-label {
@@ -70,13 +73,14 @@
       margin: 22px 0 10px;
     }
     .label-urgent { background:rgba(255,106,26,.15); color:var(--orange); border-left:3px solid var(--orange); }
-    .label-all    { background:rgba(255,255,255,.04); color:#aaa; border-left:3px solid #444; }
+    .label-video  { background:rgba(99,179,237,.1); color:#63b3ed; border-left:3px solid #63b3ed; }
+    .label-other  { background:rgba(104,211,145,.1); color:#68d391; border-left:3px solid #68d391; }
 
     /* テーブル */
     .wrap { width:100%; overflow-x:auto; }
     table {
       width:100%; border-collapse:collapse; background:var(--surface);
-      border-radius:10px; overflow:hidden; min-width:960px;
+      border-radius:10px; overflow:hidden; min-width:600px;
       border:1px solid var(--border);
     }
     th {
@@ -91,32 +95,11 @@
     }
     tr:hover td { background:rgba(255,255,255,.03); }
 
-    /* 編集セル */
-    .edit-text, .edit-date {
-      background: rgba(255,106,26,.07);
-      border: 1px solid transparent;
-      border-radius: 4px;
-      color: var(--text);
-      font-size: 0.8rem;
-      padding: 3px 7px;
-      width: 100%;
-      min-width: 80px;
-      transition: background .15s, border-color .15s;
-    }
-    .edit-text:focus, .edit-date:focus {
-      outline: none;
-      background: rgba(255,106,26,.15);
-      border-color: var(--orange);
-    }
-    .edit-text::placeholder, .edit-date:invalid { color: var(--muted); }
-    .edit-date { min-width: 110px; cursor: pointer; }
-    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.4); cursor: pointer; }
-    input[type="date"]::-webkit-datetime-edit { color: transparent; }
-    input[type="date"].has-value::-webkit-datetime-edit { color: var(--text); }
-
     /* バッジ */
-    .done    { background:rgba(255,106,26,.2);color:var(--orange);padding:2px 9px;border-radius:20px;font-size:.72rem;font-weight:700; }
     .channel { background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-size:.7rem;color:#aaa; }
+    .status-badge {
+      padding:2px 9px; border-radius:20px; font-size:.72rem; font-weight:700;
+    }
     .link-btn {
       display:inline-block; padding:3px 11px;
       background:var(--surface2); border:1px solid var(--border);
@@ -124,279 +107,101 @@
       font-size:.72rem; transition:border-color .15s,color .15s;
     }
     .link-btn:hover { border-color:var(--orange); color:var(--orange); }
+    .page-link {
+      display:inline-block; padding:3px 11px;
+      background:rgba(255,106,26,.1); border:1px solid rgba(255,106,26,.3);
+      border-radius:6px; text-decoration:none; color:var(--orange);
+      font-size:.72rem; transition:border-color .15s;
+    }
+    .page-link:hover { border-color:var(--orange); }
 
     /* 空状態 */
     .empty { color:#444; text-align:center; padding:20px; }
 
-    /* 変更ハイライト */
-    .changed { border-color: var(--orange) !important; }
+    /* ステータス色 */
+    .s-todo    { background:rgba(255,255,255,.07); color:#aaa; }
+    .s-wip     { background:rgba(99,179,237,.15);  color:#63b3ed; }
+    .s-wait    { background:rgba(252,211,77,.12);  color:#f6d860; }
+    .s-done    { background:rgba(104,211,145,.12); color:#68d391; }
+    .s-urgent  { background:rgba(255,106,26,.2);   color:var(--orange); }
+
+    .section-row {
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:8px;
+    }
   </style>
 </head>
 <body>
 
 <div class="top-bar">
   <div class="dot"></div>
-  <h1>編集D 添削タスク管理</h1>
+  <h1>タスク管理</h1>
   <span id="status" style="font-size:.75rem;color:var(--sub)">読み込み中…</span>
-  <span id="change-count" style="font-size:.78rem;color:var(--orange)"></span>
   <div class="spacer"></div>
-  <button class="btn btn-ghost" id="copy-btn" onclick="showCopy()">📋 変更をコピー</button>
 </div>
 
-<div id="copy-banner">
-  <p>以下をコピーして Claude に送ってください。送信後「変更をリセット」を押すと変更マークが消えます。</p>
-  <textarea id="copy-text" readonly></textarea>
-  <div style="display:flex;gap:8px;margin-top:8px;">
-    <button class="btn btn-orange" onclick="doCopy()">📋 クリップボードにコピー</button>
-    <button class="btn btn-ghost" onclick="resetChanges()">変更をリセット</button>
-    <button class="btn btn-ghost" onclick="document.getElementById('copy-banner').style.display='none'">閉じる</button>
-  </div>
+<div class="nav-cards">
+  <a class="nav-card" href="video-tasks.html">
+    <div class="nav-card-left">
+      <span class="nav-card-label">VIDEO TASKS</span>
+      <span class="nav-card-title">動画タスク</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="nav-card-count" id="video-count">—</span>
+      <span class="nav-card-arrow">→</span>
+    </div>
+  </a>
+  <a class="nav-card" href="other-tasks.html">
+    <div class="nav-card-left">
+      <span class="nav-card-label">OTHER TASKS</span>
+      <span class="nav-card-title">その他タスク</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="nav-card-count" id="other-count">—</span>
+      <span class="nav-card-arrow">→</span>
+    </div>
+  </a>
 </div>
 
-<div class="section-label label-urgent">⚡ 今すぐ対応が必要（引継ぎ済み・未完了）</div>
+<div class="section-label label-urgent">⚡ 今すぐ対応が必要</div>
 <div class="wrap">
   <table>
     <thead><tr>
-      <th>チャンネル</th><th>公開予定日</th><th>タイトル</th>
-      <th>編集者</th><th>初稿予定</th>
-      <th>編集者状況</th><th>添削期日</th><th>修正期日</th><th>備考</th><th></th>
+      <th>種別</th><th>タスク / タイトル</th><th>期日</th><th>状況</th><th>備考</th><th></th>
     </tr></thead>
     <tbody id="urgent-body"></tbody>
   </table>
 </div>
 
-<div class="section-label label-all">📋 全体一覧（伏見 担当 / 今日以降）</div>
+<div class="section-row">
+  <div class="section-label label-video" style="margin-bottom:10px">📹 動画タスク</div>
+  <a href="video-tasks.html" class="page-link" style="margin-bottom:10px">詳細・編集 →</a>
+</div>
 <div class="wrap">
   <table>
     <thead><tr>
-      <th>チャンネル</th><th>公開予定日</th><th>タイトル</th>
-      <th>撮影予定日</th><th>引継日</th><th>引継ぎ</th>
-      <th>編集者</th><th>初稿予定</th>
-      <th>編集者状況</th><th>添削期日</th><th>修正期日</th><th>備考</th><th></th>
+      <th>チャンネル</th><th>タイトル</th><th>公開日</th><th>編集者</th><th>編集者状況</th><th>添削期日</th><th></th>
     </tr></thead>
-    <tbody id="main-body"></tbody>
+    <tbody id="video-body"></tbody>
   </table>
 </div>
 
+<div class="section-row">
+  <div class="section-label label-other" style="margin-bottom:10px">📋 その他タスク</div>
+  <a href="other-tasks.html" class="page-link" style="margin-bottom:10px">詳細・編集 →</a>
+</div>
+<div class="wrap">
+  <table>
+    <thead><tr>
+      <th>タスク名</th><th>期日</th><th>カテゴリ</th><th>ステータス</th><th>備考</th>
+    </tr></thead>
+    <tbody id="other-body"></tbody>
+  </table>
+</div>
+
+<script src="data.js"></script>
 <script>
-var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyC_YDifiY7qnQXxrlYorz9tow6vwcnT3S5O-OACE8jz93Htlc6rTrkxC6Hwn8rl8dE/exec';
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// フォールバック＋編集フィールド保存データ（Claude が更新）
-var BAKED_DATA = [
-  {
-    "id": "成田ch_65",
-    "pubDate": "5/11",
-    "title": "物販で売上1億いくまでに大事なこと（スモビジ）",
-    "shootDate": "4/22",
-    "handoverDate": "4/24",
-    "handoverDone": "",
-    "editor": "熊谷",
-    "draftDate": "4/29",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A66",
-    "sheetName": "成田ch",
-    "editorStatus": "済",
-    "proofDeadline": "5/11",
-    "revisionDeadline": "5/10",
-    "notes": "受領＋限定公開済"
-  },
-  {
-    "id": "Yoshi ch_136",
-    "pubDate": "5/14",
-    "title": "YC ローマロエベ",
-    "shootDate": "イタリア",
-    "handoverDate": "4/2",
-    "handoverDone": "",
-    "editor": "谷添さん",
-    "draftDate": "5/6",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A137",
-    "sheetName": "Yoshi ch",
-    "editorStatus": "修正稿",
-    "proofDeadline": "5/11",
-    "revisionDeadline": "",
-    "notes": "修正は伏見対応"
-  },
-  {
-    "id": "成田ch_66",
-    "pubDate": "5/18",
-    "title": "実践者インタ木村さん",
-    "shootDate": "3/16",
-    "handoverDate": "済み",
-    "handoverDone": "",
-    "editor": "木下",
-    "draftDate": "4/29",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A67",
-    "sheetName": "成田ch",
-    "editorStatus": "修正稿",
-    "proofDeadline": "5/11",
-    "revisionDeadline": "5/14",
-    "notes": "修正稿受領"
-  },
-  {
-    "id": "Yoshi ch_137",
-    "pubDate": "5/22",
-    "title": "ブランド品転売ビジネスなら無在庫も簡単。",
-    "shootDate": "4/17",
-    "handoverDate": "4/23",
-    "handoverDone": "",
-    "editor": "谷添さん",
-    "draftDate": "5/14",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A138",
-    "sheetName": "Yoshi ch",
-    "editorStatus": "初稿待ち",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "成田ch_67",
-    "pubDate": "5/24",
-    "title": "騙されるな転売ビジネスもう稼げない",
-    "shootDate": "4/22",
-    "handoverDate": "4/24",
-    "handoverDone": "",
-    "editor": "上原",
-    "draftDate": "5/6",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A68",
-    "sheetName": "成田ch",
-    "editorStatus": "初稿",
-    "proofDeadline": "5/11",
-    "revisionDeadline": "5/17",
-    "notes": "月曜添削予定"
-  },
-  {
-    "id": "成田ch_68",
-    "pubDate": "6/1",
-    "title": "1000万稼ぎたいならクラファンが一番",
-    "shootDate": "4/22",
-    "handoverDate": "4/24",
-    "handoverDone": "",
-    "editor": "熊谷 （予定）",
-    "draftDate": "5/25",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A69",
-    "sheetName": "成田ch",
-    "editorStatus": "依頼済み",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "成田ch_69",
-    "pubDate": "6/7",
-    "title": "2026年最新スモビジ",
-    "shootDate": "4/22",
-    "handoverDate": "4/24",
-    "handoverDone": "",
-    "editor": "熊谷 （予定）",
-    "draftDate": "6/1",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1932961521&range=A70",
-    "sheetName": "成田ch",
-    "editorStatus": "依頼済み",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "船原ch_113",
-    "pubDate": "7/5",
-    "title": "差別化ローンチLINE",
-    "shootDate": "5/25",
-    "handoverDate": "",
-    "handoverDone": "",
-    "editor": "",
-    "draftDate": "",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1260224820&range=A114",
-    "sheetName": "船原ch",
-    "editorStatus": "引き継ぎ待ち",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "船原ch_115",
-    "pubDate": "7/17",
-    "title": "BUYMAローンチLINE",
-    "shootDate": "6/5",
-    "handoverDate": "",
-    "handoverDone": "",
-    "editor": "",
-    "draftDate": "",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1260224820&range=A116",
-    "sheetName": "船原ch",
-    "editorStatus": "引き継ぎ待ち",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": ""
-  },
-  {
-    "id": "船原ch_117",
-    "pubDate": "7/29",
-    "title": "（座学）仕事を辞めたい40代50代見ないと損しますLINE",
-    "shootDate": "4/10",
-    "handoverDate": "4/13",
-    "handoverDone": "",
-    "editor": "加藤",
-    "draftDate": "4/26",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1260224820&range=A118",
-    "sheetName": "船原ch",
-    "editorStatus": "修正稿",
-    "proofDeadline": "5/8",
-    "revisionDeadline": "5/10",
-    "notes": "格納待ち"
-  },
-  {
-    "id": "Yoshi ch_146",
-    "pubDate": "ストック",
-    "title": "re極貧生活",
-    "shootDate": "",
-    "handoverDate": "",
-    "handoverDone": "",
-    "editor": "北川さん",
-    "draftDate": "済？",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A147",
-    "sheetName": "Yoshi ch",
-    "editorStatus": "格納済",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": "企画D確認待ち"
-  },
-  {
-    "id": "Yoshi ch_147",
-    "pubDate": "ストック",
-    "title": "YCローマFENDI",
-    "shootDate": "イタリア",
-    "handoverDate": "3/31",
-    "handoverDone": "",
-    "editor": "",
-    "draftDate": "",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A148",
-    "sheetName": "Yoshi ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": "谷添さんに依頼したい"
-  },
-  {
-    "id": "Yoshi ch_151",
-    "pubDate": "ストック",
-    "title": "免税手続き・改",
-    "shootDate": "3/10",
-    "handoverDate": "4/23",
-    "handoverDone": "",
-    "editor": "谷添 （予定）",
-    "draftDate": "",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A152",
-    "sheetName": "Yoshi ch",
-    "editorStatus": "",
-    "proofDeadline": "",
-    "revisionDeadline": "",
-    "notes": "谷添さんに依頼したい"
-  }
-];
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-var _rows = [];
-var _changes = {};
+var _videoRows = [];
 
 var _CH_PALETTE = [
   {bg:'rgba(255,106,26,.22)', color:'#ff8c4b', border:'rgba(255,106,26,.5)'},
@@ -414,22 +219,44 @@ function chColor(name) {
   return _chColorMap[name];
 }
 
-function isUrgentRow(r) {
-  if (r.editorStatus === '完了') return false;
+function parseDateMs(str) {
+  if (!str) return null;
+  var p = str.split('/');
+  if (p.length !== 2) return null;
+  var d = new Date(new Date().getFullYear(), parseInt(p[0])-1, parseInt(p[1]));
+  d.setHours(0,0,0,0);
+  return d.getTime();
+}
+
+function isVideoUrgent(r) {
+  if (r.editorStatus === '完了' || r.editorStatus === '済') return false;
   if (r.handoverDone === '済み') return true;
-  if (r.proofDeadline) {
-    var p = r.proofDeadline.split('/');
-    if (p.length === 2) {
-      var dl = new Date(new Date().getFullYear(), parseInt(p[0])-1, parseInt(p[1]));
-      var today = new Date(); today.setHours(0,0,0,0);
-      var diff = (dl - today) / 86400000;
-      if (diff >= 0 && diff <= 3) return true;
-    }
+  var ms = parseDateMs(r.proofDeadline);
+  if (ms !== null) {
+    var today = new Date(); today.setHours(0,0,0,0);
+    var diff = (ms - today.getTime()) / 86400000;
+    if (diff >= 0 && diff <= 3) return true;
   }
   return false;
 }
 
-// JSONP でシートから取得
+function isOtherUrgent(t) {
+  if (t.status === '完了') return false;
+  var ms = parseDateMs(t.deadline);
+  if (ms === null) return false;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var diff = (ms - today.getTime()) / 86400000;
+  return diff >= 0 && diff <= 3;
+}
+
+function statusClass(s) {
+  if (!s || s === '未着手') return 's-todo';
+  if (s === '対応中') return 's-wip';
+  if (s === '待ち') return 's-wait';
+  if (s === '完了') return 's-done';
+  return 's-todo';
+}
+
 function fetchSheet(cb) {
   var name = '_cb' + Date.now();
   var sc = document.createElement('script');
@@ -448,17 +275,16 @@ function fetchSheet(cb) {
 }
 
 function init() {
-  // まず BAKED_DATA で即描画
-  _rows = BAKED_DATA.map(function(r){ return Object.assign({}, r); });
+  _videoRows = BAKED_DATA.map(function(r){ return Object.assign({}, r); });
   render();
   document.getElementById('status').textContent = '取得中…';
 
   fetchSheet(function(err, fresh) {
     if (err) {
-      document.getElementById('status').textContent = '⚠ 取得失敗（保存データを表示中）';
+      document.getElementById('status').textContent = '⚠ 取得失敗（保存データ表示中）';
       return;
     }
-    _rows = fresh.map(function(r) {
+    _videoRows = fresh.map(function(r) {
       var saved = BAKED_DATA.find(function(b){ return b.id === r.id; }) || {};
       return Object.assign({}, r, {
         editorStatus:     saved.editorStatus     || '',
@@ -473,129 +299,198 @@ function init() {
   });
 }
 
-function markChange(id, field, value) {
-  if (!_changes[id]) _changes[id] = {};
-  _changes[id][field] = value;
-  var n = Object.keys(_changes).length;
-  document.getElementById('change-count').textContent = n ? n + '件の変更あり' : '';
-}
-
-function editText(row, field, placeholder) {
-  var inp = document.createElement('input');
-  inp.type = 'text'; inp.className = 'edit-text';
-  inp.placeholder = placeholder || '';
-  inp.value = row[field] || '';
-  if (_changes[row.id] && _changes[row.id][field] !== undefined) inp.classList.add('changed');
-  inp.addEventListener('change', function() {
-    row[field] = inp.value;
-    markChange(row.id, field, inp.value);
-    inp.classList.add('changed');
-    render();
-  });
-  return inp;
-}
-
-function editDate(row, field) {
-  var inp = document.createElement('input');
-  inp.type = 'date'; inp.className = 'edit-date';
-  if (row[field]) {
-    var p = row[field].split('/');
-    if (p.length === 2)
-      inp.value = new Date().getFullYear() + '-' + p[0].padStart(2,'0') + '-' + p[1].padStart(2,'0');
-    inp.classList.add('has-value');
-  }
-  if (_changes[row.id] && _changes[row.id][field] !== undefined) inp.classList.add('changed');
-  inp.addEventListener('change', function() {
-    if (!inp.value) { row[field] = ''; markChange(row.id, field, ''); inp.classList.remove('has-value'); render(); return; }
-    var d = new Date(inp.value + 'T00:00:00');
-    var label = (d.getMonth()+1) + '/' + d.getDate();
-    row[field] = label;
-    markChange(row.id, field, label);
-    inp.classList.add('changed');
-    inp.classList.add('has-value');
-    render();
-  });
-  return inp;
-}
-
-function makeRow(r, isUrgent) {
-  var tr = document.createElement('tr');
-  function td(v, cls) {
-    var el = document.createElement('td');
-    if (cls) {
-      var s = document.createElement('span'); s.className = cls; s.textContent = v;
-      if (cls === 'channel') {
-        var c = chColor(v);
-        s.style.background = c.bg; s.style.color = c.color; s.style.borderColor = c.border;
-      }
-      el.appendChild(s);
-    } else el.textContent = v;
-    return el;
-  }
-  function tdi(el) { var d = document.createElement('td'); d.appendChild(el); return d; }
-  tr.appendChild(td(r.sheetName, 'channel'));
-  tr.appendChild(td(r.pubDate));
-  tr.appendChild(td(r.title));
-  if (!isUrgent) {
-    tr.appendChild(td(r.shootDate));
-    tr.appendChild(td(r.handoverDate));
-    tr.appendChild(td(r.handoverDone, r.handoverDone ? 'done' : ''));
-  }
-  tr.appendChild(td(r.editor));
-  tr.appendChild(td(r.draftDate));
-  tr.appendChild(tdi(editText(r, 'editorStatus', '例：初稿待ち')));
-  tr.appendChild(tdi(editDate(r, 'proofDeadline')));
-  tr.appendChild(tdi(editDate(r, 'revisionDeadline')));
-  tr.appendChild(tdi(editText(r, 'notes', '')));
-  var a = document.createElement('a');
-  a.href = r.sheetUrl; a.target = '_blank'; a.className = 'link-btn'; a.textContent = '📄';
-  var lt = document.createElement('td'); lt.appendChild(a); tr.appendChild(lt);
-  return tr;
-}
-
 function render() {
-  var ub = document.getElementById('urgent-body');
-  var mb = document.getElementById('main-body');
-  ub.innerHTML = ''; mb.innerHTML = '';
-  var uc = 0;
-  _rows.forEach(function(r) {
-    mb.appendChild(makeRow(r, false));
-    if (isUrgentRow(r)) {
-      ub.appendChild(makeRow(r, true)); uc++;
+  var videoCount = _videoRows.length;
+  var otherCount = OTHER_TASKS.filter(function(t){ return t.status !== '完了'; }).length;
+  document.getElementById('video-count').textContent = videoCount;
+  document.getElementById('other-count').textContent = otherCount;
+
+  renderUrgent();
+  renderVideo();
+  renderOther();
+}
+
+function renderUrgent() {
+  var tbody = document.getElementById('urgent-body');
+  tbody.innerHTML = '';
+  var items = [];
+
+  _videoRows.forEach(function(r) {
+    if (isVideoUrgent(r)) {
+      items.push({
+        type: '動画',
+        title: r.title,
+        deadline: r.proofDeadline || '—',
+        status: r.editorStatus,
+        notes: r.notes,
+        link: r.sheetUrl,
+        linkText: '📄',
+        ch: r.sheetName
+      });
     }
   });
-  if (!uc) ub.innerHTML = '<tr><td colspan="10" class="empty">対応が必要な案件はありません ✅</td></tr>';
-  if (!_rows.length) mb.innerHTML = '<tr><td colspan="13" class="empty">データがありません</td></tr>';
+
+  OTHER_TASKS.forEach(function(t) {
+    if (isOtherUrgent(t)) {
+      items.push({
+        type: 'その他',
+        title: t.title,
+        deadline: t.deadline || '—',
+        status: t.status,
+        notes: t.notes,
+        link: 'other-tasks.html',
+        linkText: '→',
+        ch: null
+      });
+    }
+  });
+
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">対応が必要な案件はありません ✅</td></tr>';
+    return;
+  }
+
+  items.forEach(function(item) {
+    var tr = document.createElement('tr');
+    var typeBadge = '<span class="status-badge ' + (item.type === '動画' ? 's-wip' : 's-todo') + '">' + item.type + '</span>';
+    tr.innerHTML = '<td>' + typeBadge + '</td>';
+
+    var titleTd = document.createElement('td');
+    titleTd.style.maxWidth = '260px';
+    titleTd.style.overflow = 'hidden';
+    titleTd.style.textOverflow = 'ellipsis';
+    if (item.ch) {
+      var c = chColor(item.ch);
+      var badge = document.createElement('span');
+      badge.className = 'channel';
+      badge.textContent = item.ch;
+      badge.style.background = c.bg;
+      badge.style.color = c.color;
+      badge.style.borderColor = c.border;
+      badge.style.marginRight = '8px';
+      titleTd.appendChild(badge);
+    }
+    titleTd.appendChild(document.createTextNode(item.title));
+    tr.appendChild(titleTd);
+
+    var dlTd = document.createElement('td');
+    dlTd.textContent = item.deadline;
+    dlTd.style.color = 'var(--orange)';
+    dlTd.style.fontWeight = '700';
+    tr.appendChild(dlTd);
+
+    var stTd = document.createElement('td');
+    stTd.innerHTML = '<span class="status-badge s-urgent">' + (item.status || '—') + '</span>';
+    tr.appendChild(stTd);
+
+    var ntTd = document.createElement('td');
+    ntTd.textContent = item.notes || '';
+    ntTd.style.color = 'var(--sub)';
+    tr.appendChild(ntTd);
+
+    var lkTd = document.createElement('td');
+    var a = document.createElement('a');
+    a.href = item.link; a.target = '_blank'; a.className = 'link-btn';
+    a.textContent = item.linkText;
+    lkTd.appendChild(a);
+    tr.appendChild(lkTd);
+
+    tbody.appendChild(tr);
+  });
 }
 
-function showCopy() {
-  var ids = Object.keys(_changes);
-  if (!ids.length) { alert('まだ変更はありません。'); return; }
-  var L = { editorStatus:'編集者状況', proofDeadline:'添削期日', revisionDeadline:'修正期日', notes:'備考' };
-  var lines = ['以下の変更を BAKED_DATA に反映してコミットしてください。', ''];
-  ids.forEach(function(id) {
-    var r = _rows.find(function(x){ return x.id === id; });
-    lines.push('id: ' + id + '  (' + (r ? r.sheetName + ' / ' + r.title : '') + ')');
-    Object.keys(_changes[id]).forEach(function(f) {
-      lines.push('  ' + (L[f]||f) + ': ' + (_changes[id][f] || '（空欄）'));
-    });
-    lines.push('');
+function renderVideo() {
+  var tbody = document.getElementById('video-body');
+  tbody.innerHTML = '';
+  if (!_videoRows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">データがありません</td></tr>';
+    return;
+  }
+  _videoRows.forEach(function(r) {
+    var tr = document.createElement('tr');
+
+    var chTd = document.createElement('td');
+    var badge = document.createElement('span');
+    badge.className = 'channel'; badge.textContent = r.sheetName;
+    var c = chColor(r.sheetName);
+    badge.style.background = c.bg; badge.style.color = c.color; badge.style.borderColor = c.border;
+    chTd.appendChild(badge);
+    tr.appendChild(chTd);
+
+    var titleTd = document.createElement('td');
+    titleTd.textContent = r.title;
+    titleTd.style.maxWidth = '240px';
+    titleTd.style.overflow = 'hidden';
+    titleTd.style.textOverflow = 'ellipsis';
+    tr.appendChild(titleTd);
+
+    function simpleTd(v, clr) {
+      var td = document.createElement('td');
+      td.textContent = v || '—';
+      if (clr) td.style.color = clr;
+      return td;
+    }
+
+    tr.appendChild(simpleTd(r.pubDate));
+    tr.appendChild(simpleTd(r.editor));
+
+    var stTd = document.createElement('td');
+    var sc = r.editorStatus === '済' || r.editorStatus === '完了' ? 's-done'
+           : r.editorStatus ? 's-wip' : 's-todo';
+    stTd.innerHTML = r.editorStatus
+      ? '<span class="status-badge ' + sc + '">' + r.editorStatus + '</span>'
+      : '<span style="color:var(--muted)">—</span>';
+    tr.appendChild(stTd);
+
+    var dlTd = document.createElement('td');
+    dlTd.textContent = r.proofDeadline || '—';
+    if (r.proofDeadline && isVideoUrgent(r)) dlTd.style.color = 'var(--orange)';
+    tr.appendChild(dlTd);
+
+    var lkTd = document.createElement('td');
+    var a = document.createElement('a');
+    a.href = r.sheetUrl; a.target = '_blank'; a.className = 'link-btn'; a.textContent = '📄';
+    lkTd.appendChild(a);
+    tr.appendChild(lkTd);
+
+    tbody.appendChild(tr);
   });
-  document.getElementById('copy-text').value = lines.join('\n');
-  document.getElementById('copy-banner').style.display = 'block';
-  document.getElementById('copy-banner').scrollIntoView({behavior:'smooth'});
 }
-function doCopy() {
-  navigator.clipboard.writeText(document.getElementById('copy-text').value).then(function() {
-    var b = event.target; b.textContent = '✅ コピーしました';
-    setTimeout(function(){ b.textContent = '📋 クリップボードにコピー'; }, 2000);
+
+function renderOther() {
+  var tbody = document.getElementById('other-body');
+  tbody.innerHTML = '';
+  var active = OTHER_TASKS.filter(function(t){ return t.status !== '完了'; });
+  if (!active.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">タスクなし — <a href="other-tasks.html" style="color:var(--orange)">追加する →</a></td></tr>';
+    return;
+  }
+  active.forEach(function(t) {
+    var tr = document.createElement('tr');
+
+    function td(v, extra) {
+      var el = document.createElement('td');
+      el.textContent = v || '—';
+      if (extra) Object.assign(el.style, extra);
+      return el;
+    }
+
+    tr.appendChild(td(t.title));
+
+    var dlTd = td(t.deadline || '—');
+    if (isOtherUrgent(t)) dlTd.style.color = 'var(--orange)';
+    tr.appendChild(dlTd);
+
+    tr.appendChild(td(t.category || '—', {color:'var(--sub)'}));
+
+    var stTd = document.createElement('td');
+    stTd.innerHTML = '<span class="status-badge ' + statusClass(t.status) + '">' + (t.status || '未着手') + '</span>';
+    tr.appendChild(stTd);
+
+    tr.appendChild(td(t.notes || '', {color:'var(--sub)'}));
+
+    tbody.appendChild(tr);
   });
-}
-function resetChanges() {
-  _changes = {};
-  document.getElementById('change-count').textContent = '';
-  document.getElementById('copy-banner').style.display = 'none';
-  render();
 }
 
 init();
