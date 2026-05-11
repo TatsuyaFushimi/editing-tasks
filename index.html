@@ -209,7 +209,7 @@
 <div class="wrap">
   <table>
     <thead><tr>
-      <th>チャンネル</th><th>タイトル</th><th>公開日</th><th>編集者</th><th>編集者状況</th><th>初稿期日</th><th>添削期日</th><th></th>
+      <th>チャンネル</th><th>タイトル</th><th>公開日</th><th>編集者</th><th>編集者状況</th><th>初稿期日/添削期日</th><th></th>
     </tr></thead>
     <tbody id="video-body"></tbody>
   </table>
@@ -548,12 +548,12 @@ function renderVideo() {
       : '<span style="color:var(--muted)">—</span>';
     tr.appendChild(stTd);
 
-    tr.appendChild(simpleTd(r.draftDate, 'var(--sub)'));
-
-    var dlTd = document.createElement('td');
-    dlTd.textContent = r.proofDeadline || '—';
-    if (r.proofDeadline && isVideoUrgent(r)) dlTd.style.color = 'var(--orange)';
-    tr.appendChild(dlTd);
+    var dateTd = document.createElement('td');
+    var parts = [];
+    if (r.draftDate)    parts.push('<span style="color:var(--sub)">初：' + r.draftDate + '</span>');
+    if (r.proofDeadline) parts.push('<span style="color:' + (isVideoUrgent(r) ? 'var(--orange)' : 'var(--text)') + ';font-weight:' + (isVideoUrgent(r) ? '700' : 'normal') + '">添：' + r.proofDeadline + '</span>');
+    dateTd.innerHTML = parts.length ? parts.join('<span style="color:var(--muted)"> / </span>') : '<span style="color:var(--muted)">—</span>';
+    tr.appendChild(dateTd);
 
     var lkTd = document.createElement('td');
     var a = document.createElement('a');
