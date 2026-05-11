@@ -132,6 +132,10 @@
 
     /* 変更ハイライト */
     .changed { border-color: var(--orange) !important; }
+
+    /* 済行グレーアウト */
+    tr.row-done td { opacity: .3; }
+    tr.row-done:hover td { opacity: .5; }
   </style>
 </head>
 <body>
@@ -204,6 +208,15 @@ function chColor(name) {
   return _chColorMap[name];
 }
 
+function isPastPubDate(pubDate) {
+  if (!pubDate) return false;
+  var p = pubDate.split('/');
+  if (p.length !== 2) return false; // "ストック" など
+  var today = new Date(); today.setHours(0,0,0,0);
+  var d = new Date(today.getFullYear(), parseInt(p[0])-1, parseInt(p[1]));
+  return d < today;
+}
+
 function isUrgentRow(r) {
   if (r.editorStatus === '完了' || r.editorStatus === '済') return false;
   if (r.handoverDone === '済み') return true;
@@ -237,7 +250,8 @@ function fetchSheet(cb) {
 }
 
 function init() {
-  _rows = BAKED_DATA.map(function(r){ return Object.assign({}, r); });
+  _rows = BAKED_DATA.map(function(r){ return Object.assign({}, r); })
+    .filter(function(r){ return !isPastPubDate(r.pubDate); });
   render();
   document.getElementById('status').textContent = '取得中…';
 
@@ -308,6 +322,7 @@ function editDate(row, field) {
 
 function makeRow(r, isUrgent) {
   var tr = document.createElement('tr');
+  if (r.editorStatus === '済') tr.classList.add('row-done');
   function td(v, cls) {
     var el = document.createElement('td');
     if (cls) {

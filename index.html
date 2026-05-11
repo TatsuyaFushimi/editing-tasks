@@ -118,6 +118,10 @@
     /* 空状態 */
     .empty { color:#444; text-align:center; padding:20px; }
 
+    /* 済行グレーアウト */
+    tr.row-done td { opacity: .3; }
+    tr.row-done:hover td { opacity: .5; }
+
     /* ステータス色 */
     .s-todo    { background:rgba(255,255,255,.07); color:#aaa; }
     .s-wip     { background:rgba(99,179,237,.15);  color:#63b3ed; }
@@ -221,6 +225,15 @@ function chColor(name) {
   return _chColorMap[name];
 }
 
+function isPastPubDate(pubDate) {
+  if (!pubDate) return false;
+  var p = pubDate.split('/');
+  if (p.length !== 2) return false;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var d = new Date(today.getFullYear(), parseInt(p[0])-1, parseInt(p[1]));
+  return d < today;
+}
+
 function parseDateMs(str) {
   if (!str) return null;
   var p = str.split('/');
@@ -277,7 +290,8 @@ function fetchSheet(cb) {
 }
 
 function init() {
-  _videoRows = BAKED_DATA.map(function(r){ return Object.assign({}, r); });
+  _videoRows = BAKED_DATA.map(function(r){ return Object.assign({}, r); })
+    .filter(function(r){ return !isPastPubDate(r.pubDate); });
   render();
   document.getElementById('status').textContent = '取得中…';
 
@@ -410,6 +424,7 @@ function renderVideo() {
   }
   _videoRows.forEach(function(r) {
     var tr = document.createElement('tr');
+    if (r.editorStatus === '済') tr.classList.add('row-done');
 
     var chTd = document.createElement('td');
     var badge = document.createElement('span');
