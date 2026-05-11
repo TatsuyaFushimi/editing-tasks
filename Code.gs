@@ -5,9 +5,10 @@ var SHEET_ID = '1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4';
 
 // カレンダー準備ルール
 var CAL_RULES = [
-  { pattern: 'Ch',      daysAhead: 1, type: '定例MTG',   prepLabel: 'FBの準備' },
-  { pattern: 'ナレッジ', daysAhead: 3, type: 'ナレッジ',  prepLabel: '準備'    },
-  { pattern: '1on1',    daysAhead: 1, type: '1on1',      prepLabel: '準備'    },
+  { pattern: 'Ch',         daysAhead: 1, type: '定例MTG',   prepLabel: 'FBの準備' },
+  { pattern: 'HIRAIさんMTG', daysAhead: 1, type: '定例MTG', prepLabel: 'FBの準備' },
+  { pattern: 'ナレッジ',    daysAhead: 3, type: 'ナレッジ',  prepLabel: '準備'    },
+  { pattern: '1on1',       daysAhead: 1, type: '1on1',      prepLabel: '準備'    },
 ];
 
 function doGet(e) {
