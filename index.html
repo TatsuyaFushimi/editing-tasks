@@ -225,6 +225,23 @@ function chColor(name) {
   return _chColorMap[name];
 }
 
+function sortVideoRows(rows) {
+  return rows.slice().sort(function(a, b) {
+    var ap = parseDateMs(a.proofDeadline);
+    var bp = parseDateMs(b.proofDeadline);
+    var ad = a.pubDateMs || parseDateMs(a.pubDate);
+    var bd = b.pubDateMs || parseDateMs(b.pubDate);
+
+    if (ap !== null && bp !== null) return ap - bp;
+    if (ap !== null) return -1;
+    if (bp !== null) return 1;
+    if (ad === null && bd === null) return 0;
+    if (ad === null) return 1;
+    if (bd === null) return -1;
+    return ad - bd;
+  });
+}
+
 function isPastPubDate(pubDate) {
   if (!pubDate) return false;
   var p = pubDate.split('/');
@@ -422,7 +439,7 @@ function renderVideo() {
     tbody.innerHTML = '<tr><td colspan="7" class="empty">データがありません</td></tr>';
     return;
   }
-  _videoRows.forEach(function(r) {
+  sortVideoRows(_videoRows).forEach(function(r) {
     var tr = document.createElement('tr');
     if (r.editorStatus === '済') tr.classList.add('row-done');
 

@@ -208,6 +208,31 @@ function chColor(name) {
   return _chColorMap[name];
 }
 
+function dateToMs(str) {
+  if (!str) return null;
+  var p = str.split('/');
+  if (p.length !== 2) return null;
+  var y = new Date().getFullYear();
+  return new Date(y, parseInt(p[0])-1, parseInt(p[1])).getTime();
+}
+
+function sortRows(rows) {
+  return rows.slice().sort(function(a, b) {
+    var ap = dateToMs(a.proofDeadline);
+    var bp = dateToMs(b.proofDeadline);
+    var ad = a.pubDateMs || dateToMs(a.pubDate);
+    var bd = b.pubDateMs || dateToMs(b.pubDate);
+
+    if (ap !== null && bp !== null) return ap - bp;
+    if (ap !== null) return -1;
+    if (bp !== null) return 1;
+    if (ad === null && bd === null) return 0;
+    if (ad === null) return 1;
+    if (bd === null) return -1;
+    return ad - bd;
+  });
+}
+
 function isPastPubDate(pubDate) {
   if (!pubDate) return false;
   var p = pubDate.split('/');
@@ -361,7 +386,7 @@ function render() {
   var mb = document.getElementById('main-body');
   ub.innerHTML = ''; mb.innerHTML = '';
   var uc = 0;
-  _rows.forEach(function(r) {
+  sortRows(_rows).forEach(function(r) {
     mb.appendChild(makeRow(r, false));
     if (isUrgentRow(r)) {
       ub.appendChild(makeRow(r, true)); uc++;
