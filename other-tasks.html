@@ -199,7 +199,7 @@
   </table>
 </div>
 
-<script src="data.js"></script>
+<script>document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 var _tasks = OTHER_TASKS.map(function(t){ return Object.assign({}, t); });
 var _changes = {};
