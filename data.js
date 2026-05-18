@@ -48,8 +48,8 @@ var BAKED_DATA = [
     "sheetName": "成田ch",
     "editorStatus": "修正稿",
     "proofDeadline": "5/11",
-    "revisionDeadline": "5/14",
-    "notes": "修正稿受領"
+    "revisionDeadline": "5/18",
+    "notes": "書き出し＋限定公開"
   },
   {
     "id": "Yoshi ch_137",
@@ -63,8 +63,8 @@ var BAKED_DATA = [
     "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=706953571&range=A138",
     "sheetName": "Yoshi ch",
     "editorStatus": "初稿待ち",
-    "proofDeadline": "",
-    "revisionDeadline": "",
+    "proofDeadline": "5/20",
+    "revisionDeadline": "5/15",
     "notes": ""
   },
   {
@@ -159,9 +159,9 @@ var BAKED_DATA = [
     "sheetUrl": "https://docs.google.com/spreadsheets/d/1VswrYvsGmY7hKLXwIjh9cptVHqhwthCiy5hatLvn-A4/edit#gid=1260224820&range=A118",
     "sheetName": "船原ch",
     "editorStatus": "修正稿",
-    "proofDeadline": "5/8",
-    "revisionDeadline": "5/10",
-    "notes": "格納待ち"
+    "proofDeadline": "",
+    "revisionDeadline": "5/20",
+    "notes": "手元修正"
   },
   {
     "id": "Yoshi ch_146",
@@ -238,5 +238,14 @@ var OTHER_TASKS = [
     "status": "未着手",
     "notes": "",
     "createdDate": "5/11"
+  },
+  {
+    "id": "other_003",
+    "title": "萬田さんChフォーマット",
+    "deadline": "5/19",
+    "category": "作業",
+    "status": "対応中",
+    "notes": "諸々の準備",
+    "createdDate": "5/18"
   }
 ];
